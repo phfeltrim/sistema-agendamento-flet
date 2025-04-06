@@ -1,9 +1,10 @@
 import flet as ft
 
-class ConfiguracoesView(ft.UserControl):
+class ConfiguracoesView(ft.Container):
     def __init__(self, page: ft.Page):
         super().__init__()
         self.page = page
+        self.content = self.build()
 
     def build(self):
         return ft.Container(

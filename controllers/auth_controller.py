@@ -8,6 +8,9 @@ class AuthController:
     def login(self, email: str, password: str) -> bool:
         if not email or not password:
             return False
+
+        if not self.db.connect():
+            return False
             
         hashed_password = hashlib.sha256(password.encode()).hexdigest()
         

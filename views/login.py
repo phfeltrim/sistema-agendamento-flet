@@ -1,13 +1,14 @@
 import flet as ft
 from controllers.auth_controller import AuthController
 
-class LoginView(ft.UserControl):
+class LoginView(ft.Container):
     def __init__(self, page: ft.Page, on_login_success):
         super().__init__()
         self.page = page
         self.on_login_success = on_login_success
         self.auth_controller = AuthController()
         
+        # Inicializa os campos antes de build()
         self.email_field = ft.TextField(
             label="Email",
             border=ft.InputBorder.UNDERLINE,
@@ -18,9 +19,13 @@ class LoginView(ft.UserControl):
             label="Senha",
             border=ft.InputBorder.UNDERLINE,
             password=True,
+            can_reveal_password=True,
             width=300
         )
-
+        
+        # Define o conteúdo após criar os campos
+        self.content = self.build()
+        
     def login(self, e):
         email = self.email_field.value
         password = self.password_field.value

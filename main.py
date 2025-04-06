@@ -12,78 +12,16 @@ def main(page: ft.Page):
     page.window_width = 1000
     page.window_height = 600
     page.window_resizable = False
-    
-    # Função para mudar de view
-    def change_view(view):
-        page.clean()
-        page.add(view)
-        
-    # Navegação principal
-    def show_main_navigation():
-        nav_rail = ft.NavigationRail(
-            selected_index=0,
-            label_type=ft.NavigationRailLabelType.ALL,
-            extended=True,
-            destinations=[
-                ft.NavigationRailDestination(
-                    icon=ft.icons.CALENDAR_TODAY,
-                    label="Agenda"
-                ),
-                ft.NavigationRailDestination(
-                    icon=ft.icons.PEOPLE,
-                    label="Pacientes"
-                ),
-                ft.NavigationRailDestination(
-                    icon=ft.icons.LIST_ALT,
-                    label="Sessões"
-                ),
-                ft.NavigationRailDestination(
-                    icon=ft.icons.SETTINGS,
-                    label="Configurações"
-                ),
-            ],
-            on_change=lambda e: handle_navigation_change(e.control.selected_index)
-        )
-        
-        page.add(
-            ft.Row(
-                controls=[
-                    nav_rail,
-                    ft.VerticalDivider(width=1),
-                    views[0]  # Agenda view é a view inicial
-                ],
-                expand=True
-            )
-        )
-    
-    # Lista de views disponíveis
-    views = [
-        AgendaView(page),
-        PacientesView(page),
-        SessoesView(page),
-        ConfiguracoesView(page)
-    ]
-    
-    def handle_navigation_change(index):
-        page.clean()
-        page.add(
-            ft.Row(
-                controls=[
-                    nav_rail,
-                    ft.VerticalDivider(width=1),
-                    views[index]
-                ],
-                expand=True
-            )
-        )
+    page.padding = 0
     
     # Callback para quando o login for bem-sucedido
     def on_login_success():
-        show_main_navigation()
+        page.clean()
+        page.add(AgendaView(page))
+        page.update()
     
     # Inicia com a tela de login
-    login_view = LoginView(page, on_login_success)
-    page.add(login_view)
+    page.add(LoginView(page, on_login_success))
     page.update()
 
 if __name__ == "__main__":

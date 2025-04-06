@@ -7,19 +7,27 @@ load_dotenv()
 
 class Database:
     def __init__(self):
-        try:
-            self.conn = mysql.connector.connect(
-                host="localhost",
-                user="root",
-                password=""
-            )
-            if self.conn.is_connected():
-                self.cursor = self.conn.cursor(dictionary=True)
-                self.cursor.execute("CREATE DATABASE IF NOT EXISTS agendamento")
-                self.conn.database = "agendamento"
-                self._create_tables()
-        except Error as e:
-            print(f"Erro ao conectar ao MySQL: {e}")
+        self.conn = None
+        self.cursor = None
+
+    def connect(self):
+        if not self.conn or not self.conn.is_connected():
+            try:
+                self.conn = mysql.connector.connect(
+                    host="localhost",
+                    user="root",
+                    password=""
+                )
+                if self.conn.is_connected():
+                    self.cursor = self.conn.cursor(dictionary=True)
+                    self.cursor.execute("CREATE DATABASE IF NOT EXISTS agendamento")
+                    self.conn.database = "agendamento"
+                    self._create_tables()
+                    return True
+            except Error as e:
+                print(f"Erro ao conectar ao MySQL: {e}")
+                return False
+        return True
 
     def _create_tables(self):
         tables = [
