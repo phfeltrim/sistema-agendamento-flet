@@ -39,19 +39,79 @@ class LoginView(ft.Container):
 
     def build(self):
         return ft.Container(
-            content=ft.Column(
+            content=ft.Row(
                 controls=[
-                    ft.Text("Login", size=30, weight=ft.FontWeight.BOLD),
-                    self.email_field,
-                    self.password_field,
-                    ft.ElevatedButton(
-                        text="Entrar",
-                        on_click=self.login,
-                        width=300
+                    # Lado esquerdo - Imagem/Logo
+                    ft.Container(
+                        content=ft.Column(
+                            controls=[
+                                ft.Icon(
+                                    ft.icons.CALENDAR_MONTH,
+                                    size=64,
+                                    color=ft.colors.PRIMARY
+                                ),
+                                ft.Text(
+                                    "Sistema de Agendamento",
+                                    size=32,
+                                    weight=ft.FontWeight.BOLD,
+                                    color=ft.colors.PRIMARY
+                                ),
+                                ft.Text(
+                                    "Gerencie seus agendamentos de forma simples e eficiente",
+                                    size=16,
+                                    color=ft.colors.SECONDARY
+                                )
+                            ],
+                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                            alignment=ft.MainAxisAlignment.CENTER,
+                            spacing=20
+                        ),
+                        bgcolor=ft.colors.PRIMARY_CONTAINER,
+                        expand=True,
+                        alignment=ft.alignment.center
+                    ),
+                    # Lado direito - Formulário de login
+                    ft.Container(
+                        content=ft.Column(
+                            controls=[
+                                ft.Text(
+                                    "Bem-vindo de volta!",
+                                    size=32,
+                                    weight=ft.FontWeight.BOLD
+                                ),
+                                ft.Text(
+                                    "Entre com suas credenciais para continuar",
+                                    size=16,
+                                    color=ft.colors.SECONDARY
+                                ),
+                                ft.Container(height=20),  # Espaçamento
+                                self.email_field,
+                                self.password_field,
+                                ft.Container(height=10),  # Espaçamento
+                                ft.ElevatedButton(
+                                    content=ft.Text(
+                                        "Entrar",
+                                        size=16,
+                                        weight=ft.FontWeight.W_500
+                                    ),
+                                    style=ft.ButtonStyle(
+                                        shape=ft.RoundedRectangleBorder(radius=8),
+                                        padding=ft.padding.symmetric(horizontal=24, vertical=16)
+                                    ),
+                                    on_click=self.login,
+                                    width=300
+                                )
+                            ],
+                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                            spacing=10,
+                            width=400
+                        ),
+                        expand=True,
+                        alignment=ft.alignment.center,
+                        padding=50
                     )
                 ],
-                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                spacing=20
+                expand=True
             ),
-            alignment=ft.alignment.center
+            expand=True
         )

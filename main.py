@@ -9,10 +9,23 @@ def main(page: ft.Page):
     # Configuração da página
     page.title = "Sistema de Agendamento"
     page.theme_mode = "light"
-    page.window_width = 1000
-    page.window_height = 600
-    page.window_resizable = False
+    page.window_width = 1366
+    page.window_height = 768
+    page.window_resizable = True
+    page.window_min_width = 1024
+    page.window_min_height = 720
     page.padding = 0
+    page.theme = ft.Theme(
+        color_scheme_seed="#6E62E5",
+        visual_density=ft.VisualDensity.COMFORTABLE,
+        use_material3=True
+    )
+    
+    # Configurações de fonte
+    page.fonts = {
+        "Poppins": "https://raw.githubusercontent.com/google/fonts/main/ofl/poppins/Poppins-Regular.ttf"
+    }
+    page.theme.font_family = "Poppins"
     
     # Callback para quando o login for bem-sucedido
     def on_login_success():
