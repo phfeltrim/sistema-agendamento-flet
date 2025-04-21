@@ -1,12 +1,19 @@
 import flet as ft
 from controllers.auth_controller import AuthController
+from settings.featureToggle import FeatureToggle
 
 class LoginView(ft.Container):
     def __init__(self, page: ft.Page, on_login_success):
         super().__init__()
         self.page = page
-        self.on_login_success = on_login_success
-        self.auth_controller = AuthController()
+
+        # Verifica se o recurso de banco de dados simulado está ativado
+        if FeatureToggle.toggle_database.value == True:
+            self.on_login_success = True
+            self.auth_controller = True
+        else:     
+            self.on_login_success = on_login_success
+            self.auth_controller = AuthController()
         
         # Inicializa os campos antes de build()
         self.email_field = ft.TextField(

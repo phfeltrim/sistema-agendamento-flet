@@ -1,5 +1,11 @@
 # BANCO DE DADOS
 
+#### LINKS ÚTEIS
+
+| `Links`                                       | `Descrição` |
+| --------------------------------------------- | ----------- |
+| [infinityfree](https://www.infinityfree.com/) | Database    |
+
 #### DESCRIÇÃO
 
 Este diretório contém os arquivos relacionados ao banco de dados do sistema de gerenciamento de agendamentos. Ele inclui scripts de criação, configuração e manutenção do banco de dados, bem como documentação sobre sua estrutura e funcionamento.
