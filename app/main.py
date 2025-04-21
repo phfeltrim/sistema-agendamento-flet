@@ -30,7 +30,7 @@ def main(page: ft.Page):
     # Callback para quando o login for bem-sucedido
     def on_login_success():
         page.clean()
-        page.add(AgendaView(page))
+        page.add(AgendaView(page, None))
         page.update()
     
     # Inicia com a tela de login
