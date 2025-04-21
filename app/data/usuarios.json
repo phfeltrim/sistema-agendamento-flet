@@ -1,0 +1,44 @@
+{
+    "usuarios": [
+        {
+            "id": 1,
+            "email": "admin@admin.com",
+            "password": "admin123"
+        },
+        {
+            "id": 2,
+            "email": "edu@teste.com",
+            "password": "senha123"
+        },
+        {
+            "id": 3,
+            "email": "castro@teste.com",
+            "password": "castro123"
+        },
+        {
+            "id": 4,
+            "email": "luiz@teste.com",
+            "password": "castro123"
+        },
+        {
+            "id": 5,
+            "email": "pezzotti@teste.com",
+            "password": "pezzotti123"
+        },
+        {
+            "id": 6,
+            "email": "pamela@teste.com",
+            "password": "pamela123"
+        },
+        {
+            "id": 7,
+            "email": "livia@teste.com",
+            "password": "livia123"
+        },
+        {
+            "id": 8,
+            "email": "karla@teste.com",
+            "password": "karla123"
+        }
+    ]
+}
