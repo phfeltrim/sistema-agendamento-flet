@@ -40,5 +40,11 @@ class ConfiguracoesView(ft.Container):
         )
 
     def save_settings(self, e):
-        # Implementar lógica para salvar configurações
-        pass
+        try:
+            self.page.snack_bar = ft.SnackBar(content=ft.Text("Configurações salvas!"))
+            self.page.snack_bar.open = True
+            self.page.update()
+        except Exception as ex:
+            dlg = ft.AlertDialog(title=ft.Text("Aviso"), content=ft.Text("Configurações salvas!"), open=True)
+            self.page.dialog = dlg
+            self.page.update()

@@ -1,0 +1,155 @@
+Este arquivo tem como objetivo parametrizar e dar diretrizes ao desenvolvimento do app.
+
+
+
+(x) - O app deve ter as seguintes telas:
+    (x) - 1. Login
+    (x) - 2. Agenda
+    (x) - 3. Pacientes
+    (x) - 4. Sessões
+    (x) - 5. Configurações
+
+Estrutura das paginas:
+
+    (x) - Exceto a tela de login, todas as telas devem seguir o mesmo padrão.
+    (x) - 2 areas principais, sendo:
+    (x) - Coluna 1 - 2 linhas, sendo que a primeira linha deve ter o logo do app, e a segunda linha deve ter o menu.
+    (x) - Coluna 2 - 1 linha, sendo que a linha deve ter o palco (main content).
+    (x) - Todos os modulos devem ser carregados na coluna 2.
+    (x) - Todos os botões da coluna 1 devem acionar os modulos para serem carregados na coluna 2.
+Menu
+    (x) - O menu terá 5 opções, sendo:
+        (x) - 1. Agenda
+        (x) - 2. Pacientes
+        (x) - 3. Sessões
+        (x) - 4. Configurações
+        (x) - 5. Sair
+
+Login:
+
+            (x) - Página de fundo cinza com uma retangulo branco e cantos arredondados.
+            (x) - Retangulo branco deve ter 2 colunas, 1 linha, sendo que a primeira coluna deve ter o logo do app no centralizado, e a segunda coluna deve ter outro retangulo cinza (tom mais claro que o fundo da página) e cantos arredondados, que será o campo de login.
+            (x) - O campo de login deve ter 2 colunas, 1 linha, sendo que a primeira coluna deve ter o campo de login e a segunda coluna deve ter o campo de senha.
+            (x) - O campo de login deve ter o label "Login" e o campo de senha deve ter o label "Senha".
+            (x) - O campo de login deve ter o placeholder "Digite seu login" e o campo de senha deve ter o placeholder "Digite sua senha".
+            (x) - O botão de login deve ter o label "Acessar".
+            (x) - O botão de login deve ter o evento de click, que deve chamar a função de login.
+        () - O campo login e senha devem aceitar tabulações e pressionar enter para enviar o form.
+        # atenção: para confirmar a entrada com a tecla enter o bt tem que estar selecionado. o Ideal é que ao digitar a senha seja possivel apertar enter sem ter que tabular para o bt.
+            (x) - BD: Os dados dos usuarios serão gravados na tabela users.
+            (x) - Por padrão o usuario id 1 será o admin e a senha será admin123.
+
+Agenda:
+
+            (x) - Formada por 2 linhas, sendo que a primeira linha deve ter o titulo "Agenda".
+            (x) - A segunda linha deve ter 2 colunas, sendo que a primeira coluna deve ter o Calendário do mês atual.
+            (x) - A segunda coluna deve ter a agenda do dia selecionado no calendário, está coluna se chamará "Agenda do dia".
+            (x) - O calendario deve começar a semana com o domingo, os dias da semana serão abreviados em 3 letras.
+            (x) - A coluna da agenda do dia deve ter em seu topo a data selecionada no calendário, como esse exemplo: Terça, 25 de Abril de 2025.
+            (x) - As linhas de horarios devem ter o intervalo de uma hora, sendo a hora inicial e a hora final definidas em configurações.
+            (x) - Em cada linha terá o horario fixo, o nome do paciente (se houver agendamento), e um botão quadrado com o sinal de "+". As linhas de horarios que não tem paciente agendado devem apresentar uma lacuna entre a hora e o botão "+".
+            (x) - Ao clicar no botão "Novo Agendamento", abrirá um modal com o form de agendamento, trazendo os campos de id do paciente, campo nome do paciente e o campo do tipo list com os horario disponiveis para o dia em questão.
+            (x) - Abaixo os botoes de Salvar e Excluir.
+        Mecanica de agendamento:
+            (x) - Os agendamentos serão realizados de forma manual, e registrados na tabela sessoes.
+            (x) - Não poderá haver agendamentos duplicados.
+            (x) - A tabela Sessoes tem as colunas:
+                  (x)  - id (int, auto increment): Id do registro;
+                  (x)  - id_pac (int, foreign key): Id do paciente;
+                  (x)  - date (datetime): Data e hora do agendamento;
+                  (x)  - status (bool): para indicar se está pago ou não será editado apenas na tela de sessões mais abaixo ao ser criada, 1 para pago e 0 para não pago;
+                  (x)  - user (int, foreign key): Id do usuario;
+                  (x)  - data_stamp (datetime): Data de criação.
+
+Pacientes:
+
+O modulo Paciente deverá ter o titulo "Pacientes".
+Logo abaixo do titulo, deve ter um campo de busca. Ao lado do botão buscar que está na mesma linha do campo de busca, deve ter o botão Novo Paciente.
+Abaixo do campo de busca, deve ter uma tabela com os dados dos pacientes.
+A tabela deve mostrar apenas o id, nome completo, telefone e CPF do paciente. Ao final da linha deve ter um botão de editar. Essa tabela deve ocupar o restante da tela com um padding de 10px.
+O cadastro do paciente de ser formado pelos dados do paciente, como nome, telefone, CPF, CEP, número, complemento, data de nascimento, email e telefone.
+O botão de editar deve abrir um modal com os dados do paciente possibilitando a edição.
+Nenhum paciente poderá ser excluído, apenas desativado. A opção de desativar deve ser feita pelo botão de editar.
+
+BD: A tabela do banco de dados para que carregará os pacientes terá o nome de pacientes.
+Colunas da tabela:
+- id (int, auto increment): Id do registro;
+- name (varchar): Nome do paciente;
+- cpf (varchar): CPF do paciente;
+- telefone (varchar): Telefone do paciente;
+- cep (varchar): CEP do paciente;
+- number (varchar): Número do endereço;
+- complement (varchar): Complemento do endereço;
+- email (varchar): Email do paciente;
+- status (bool): Status do paciente, 1 para ativo e 0 para desativado;
+- user (int, foreign key): Id do usuario;
+- data_stamp (datetime): Data de criação.
+- data_modif (datetime): Data de modificação.
+- user_modif (int): Id do usuario que modificou.
+
+Sessões:
+
+O modulo Sessões deverá ter o titulo "Sessões".
+Logo abaixo do titulo, deve ter um campo de busca.
+Abaixo do campo de busca, deve ter uma tabela com os dados das sessões.
+A tabela exibirá as colunas de data da sessão, id do paciente, nome do paciente, e o status (icone check para pago, icone x para não pago). Ao final da linha deve ter um botão de editar.
+Os dados serão ordenados do mais recente para o mais antigo.
+Ao clicar em editar o modal deverá informar o id e nome do paciente na primeira linha, na segunda linha a data e horario da sessão.
+A terceira linha deve ter 2 radio button com o label 'Pago' e opções de 'sim' e 'não'.
+A quarta linha deve ter o botão de Salvar que será habilitado apenas quando o radio button sofrer alteração.
+
+Esse modulo vai interagir com a tabela Sessoes, alterando apenas a condição da coluna status.
+
+Configurações:
+
+O modulo configurações deve ter o titulo "Configurações".
+Neste modulo terá as opções de cadastro dos usuarios inicialmente.
+Logo acima teremos o botão de adicionar um 'novo usuario'.
+Abaixo a tabela com os usuarios do sistema, exibindo o id, nome e o botão de edição.
+O modal de cadastro de usuario deve ter o titulo "Cadastro de Usuario".
+O 1º text input será o nome do usuario, o 2º text input será o campo Função.
+O 3º text input será o campo Senha.
+O 4º text input será o campo confirmação de Senha.
+Abaixo o botão salvar.
+
+Ao clicar em editar o modal exibirá o form com o titulo "Edição de Usuario ID {id}". 
+O 1º text input será o nome do usuario, o 2º text input será o campo Função.
+O 3º text input será o campo Senha.
+O 4º text input será o campo confirmação de Senha.
+na linha seguinte um checkbox para ativar o usuario.
+Abaixo o botão salvar.
+
+O modulo configurações vai interagir com a tabela users.
+a tabela users tem as colunas:
+- id (int, auto increment): Id do registro;
+- name (varchar): Nome do usuario;
+- funcao (varchar): Função do usuario;
+- senha (varchar): Senha do usuario;
+- status (bool): Status do usuario, 1 para ativo e 0 para desativado. padrão 1;
+- data_stamp (datetime): Data de criação.
+- data_modif (datetime): Data de modificação.
+- user_modif (int): Id do usuario que modificou.
+
+Importante:
+
+Estrutura das pastas:
+app
+|--- controllers
+|--- models
+|--- scripts
+|--- views
+|--- database
+-main.py
+-requirements.txt
+
+
+Linguagens:
+- Python
+- MySQL
+- Flet
+
+
+
+Ajustes:
+() Layout - Agenda - Calendario - O mês que encabeça o calendario tem que ficar justificados a largura total da linha, o mês e ano centralizados na linha e as setas em cada extremidade.
+() Funcionalidade - 

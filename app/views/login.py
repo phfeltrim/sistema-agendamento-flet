@@ -9,14 +9,16 @@ class LoginView(ft.Container):
         self.auth_controller = AuthController()
         
         # Inicializa os campos antes de build()
-        self.email_field = ft.TextField(
-            label="Email",
+        self.login_field = ft.TextField(
+            label="Login",
+            hint_text="Digite seu login",
             border=ft.InputBorder.UNDERLINE,
             width=300
         )
         
         self.password_field = ft.TextField(
             label="Senha",
+            hint_text="Digite sua senha",
             border=ft.InputBorder.UNDERLINE,
             password=True,
             can_reveal_password=True,
@@ -27,21 +29,23 @@ class LoginView(ft.Container):
         self.content = self.build()
         
     def login(self, e):
-        email = self.email_field.value
+        login = self.login_field.value
         password = self.password_field.value
         
-        if self.auth_controller.login(email, password):
+        if self.auth_controller.login(login, password):
             self.on_login_success()
         else:
-            self.page.show_snack_bar(
-                ft.SnackBar(content=ft.Text("Email ou senha inválidos"))
-            )
+            self.page.snack_bar = ft.SnackBar(content=ft.Text("Email ou senha inválidos"))
+            self.page.snack_bar.open = True
+            self.page.update()
 
     def build(self):
         return ft.Container(
+            bgcolor=ft.colors.GREY_200,
+            expand=True,
             content=ft.Row(
                 controls=[
-                    # Lado esquerdo - Imagem/Logo
+                    # Coluna 1: Logo
                     ft.Container(
                         content=ft.Column(
                             controls=[
@@ -55,56 +59,55 @@ class LoginView(ft.Container):
                                     size=32,
                                     weight=ft.FontWeight.BOLD,
                                     color=ft.colors.PRIMARY
-                                ),
-                                ft.Text(
-                                    "Gerencie seus agendamentos de forma simples e eficiente",
-                                    size=16,
-                                    color=ft.colors.SECONDARY
                                 )
                             ],
                             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                             alignment=ft.MainAxisAlignment.CENTER,
                             spacing=20
                         ),
-                        bgcolor=ft.colors.PRIMARY_CONTAINER,
+                        bgcolor=ft.colors.WHITE,
+                        border_radius=20,
                         expand=True,
-                        alignment=ft.alignment.center
+                        alignment=ft.alignment.center,
+                        padding=40
                     ),
-                    # Lado direito - Formulário de login
+                    # Coluna 2: Formulário de login
                     ft.Container(
-                        content=ft.Column(
-                            controls=[
-                                ft.Text(
-                                    "Bem-vindo de volta!",
-                                    size=32,
-                                    weight=ft.FontWeight.BOLD
-                                ),
-                                ft.Text(
-                                    "Entre com suas credenciais para continuar",
-                                    size=16,
-                                    color=ft.colors.SECONDARY
-                                ),
-                                ft.Container(height=20),  # Espaçamento
-                                self.email_field,
-                                self.password_field,
-                                ft.Container(height=10),  # Espaçamento
-                                ft.ElevatedButton(
-                                    content=ft.Text(
-                                        "Entrar",
-                                        size=16,
-                                        weight=ft.FontWeight.W_500
+                        content=ft.Container(
+                            bgcolor=ft.colors.GREY_100,
+                            border_radius=20,
+                            padding=40,
+                            content=ft.Column(
+                                controls=[
+                                    ft.Text(
+                                        "Bem-vindo!",
+                                        size=28,
+                                        weight=ft.FontWeight.BOLD
                                     ),
-                                    style=ft.ButtonStyle(
-                                        shape=ft.RoundedRectangleBorder(radius=8),
-                                        padding=ft.padding.symmetric(horizontal=24, vertical=16)
-                                    ),
-                                    on_click=self.login,
-                                    width=300
-                                )
-                            ],
-                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                            spacing=10,
-                            width=400
+                                    ft.Container(height=20),
+                                    ft.Row([
+                                        self.login_field,
+                                        self.password_field
+                                    ], spacing=10),
+                                    ft.Container(height=20),
+                                    ft.ElevatedButton(
+                                        content=ft.Text(
+                                            "Acessar",
+                                            size=16,
+                                            weight=ft.FontWeight.W_500
+                                        ),
+                                        style=ft.ButtonStyle(
+                                            shape=ft.RoundedRectangleBorder(radius=8),
+                                            padding=ft.padding.symmetric(horizontal=24, vertical=16)
+                                        ),
+                                        on_click=self.login,
+                                        width=300
+                                    )
+                                ],
+                                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                                spacing=10,
+                                width=400
+                            )
                         ),
                         expand=True,
                         alignment=ft.alignment.center,
@@ -112,6 +115,5 @@ class LoginView(ft.Container):
                     )
                 ],
                 expand=True
-            ),
-            expand=True
+            )
         )
