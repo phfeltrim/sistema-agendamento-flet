@@ -442,7 +442,7 @@ class AgendaView(ft.Container):
         # 1. Data selecionada (não editável)
         selected_date = self.current_date
         # Data em português
-        dias_semana = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"]
+        dias_semana = ["Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado", "Domingo"]
         meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]
         dia_semana = dias_semana[selected_date.weekday()]
         mes = meses[selected_date.month - 1]
