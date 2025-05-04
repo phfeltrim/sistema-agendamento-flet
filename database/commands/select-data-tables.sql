@@ -1,3 +1,3 @@
--- Consulta dados
+-- Select registros na tabela sessoes
 
-SELECT * FROM tb_pessoa;
+SELECT id, nome, email, created_at FROM usuarios ORDER BY id DESC;

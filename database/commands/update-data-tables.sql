@@ -1,4 +1,3 @@
--- update data tables
+-- Update registros na tabela sessoes
 
--- update data tables
-UPDATE `data` SET `value` = 'new_value' WHERE `id` = 1;
+UPDATE sessoes SET {', '.join(campos)} WHERE id=%s;
