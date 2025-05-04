@@ -1,3 +1,3 @@
--- Delete registro
+-- Delete registros na tabela sessoes
 
-DELETE FROM registro WHERE id = 1;
+DELETE FROM sessoes WHERE id=%s;
