@@ -1,5 +1,7 @@
 import flet as ft
 from datetime import datetime, timedelta
+from controllers.pacientes_controller import PacientesController
+from controllers.sessoes_controller import SessoesController
 
 class AgendaView(ft.Container):
     def __init__(self, page: ft.Page, on_view_change):
@@ -8,9 +10,16 @@ class AgendaView(ft.Container):
         self.on_view_change = on_view_change
         self.current_date = datetime.now()
         self.appointments = []  # Lista de agendamentos
-        self.navigation = self.build_navigation()
+        # self.navigation = self.build_navigation()
         self.expand = True
         self.content = self.build()
+
+    def formatar_mes_ano_ptbr(self, data):
+        meses = [
+            "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+            "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+        ]
+        return f"{meses[data.month-1]} {data.year}"
 
     def build_navigation(self):
         return ft.Container(
@@ -33,7 +42,7 @@ class AgendaView(ft.Container):
                         selected_index=0,
                         label_type=ft.NavigationRailLabelType.ALL,
                         extended=True,
-                        bgcolor=ft.colors.SURFACE_VARIANT,
+                        
                         destinations=[
                             ft.NavigationRailDestination(
                                 icon=ft.icons.CALENDAR_TODAY_OUTLINED,
@@ -58,158 +67,120 @@ class AgendaView(ft.Container):
                         ],
                         on_change=self.handle_navigation_change
                     ),
-                    expand=True
+                    
                 )
-            ], expand=True),
-            bgcolor=ft.colors.SURFACE_VARIANT,
+            ], ),
+            
             width=250,
             height=768  # Altura fixa igual à altura da janela
         )
 
     def handle_navigation_change(self, e):
         index = e.control.selected_index
-        routes = ["/agenda", "/pacientes", "/sessoes", "/configuracoes"]
-        self.page.go(routes[index])
+        views = ["agenda", "pacientes", "sessoes", "configuracoes"]
+        if self.on_view_change:
+            self.on_view_change(views[index])
 
     def build(self):
         return ft.Container(
-            content=ft.Row(
+            expand=True,
+            content=ft.Column(
                 controls=[
-                    self.navigation,
-                    ft.Container(
-                        content=ft.Column([
-                            # Barra superior
+                    ft.Text("Agenda", size=30, weight=ft.FontWeight.BOLD),
+                    ft.Row(
+                        controls=[
                             ft.Container(
-                                content=ft.Row(
-                                    controls=[
-                                        ft.Container(
-                                            content=ft.Row(
-                                                controls=[
-                                                    ft.Icon(ft.icons.SEARCH),
-                                                    ft.TextField(
-                                                        border=ft.InputBorder.NONE,
-                                                        hint_text="Buscar...",
-                                                        expand=True
-                                                    )
-                                                ],
-                                                spacing=10
-                                            ),
-                                            bgcolor=ft.colors.SURFACE_VARIANT,
-                                            border_radius=8,
-                                            padding=10,
-                                            expand=True
-                                        ),
-                                        ft.IconButton(
-                                            icon=ft.icons.NOTIFICATIONS_OUTLINED,
-                                            tooltip="Notificações"
-                                        ),
-                                        ft.IconButton(
-                                            icon=ft.icons.PERSON_OUTLINED,
-                                            tooltip="Perfil"
-                                        )
-                                    ],
-                                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN
-                                ),
-                                padding=ft.padding.only(left=32, top=20, right=32, bottom=20)
+                                content=self.build_calendar(),
+                                expand=True
                             ),
-                            # Conteúdo principal
                             ft.Container(
-                                content=ft.Column([
-                                    # Título e botão de novo agendamento
-                                    ft.Row(
-                                        controls=[
-                                            ft.Text(
-                                                "Agenda",
-                                                size=32,
-                                                weight=ft.FontWeight.BOLD
-                                            ),
-                                            ft.ElevatedButton(
-                                                "Novo Agendamento",
-                                                icon=ft.icons.ADD,
-                                                on_click=self.new_appointment
-                                            )
-                                        ],
-                                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN
-                                    ),
-                                    # Calendário e lista de agendamentos lado a lado
-                                    ft.Row(
-                                        controls=[
-                                            # Coluna do calendário
-                                            ft.Container(
-                                                content=self.build_calendar(),
-                                                expand=3  # Ocupa 3/5 do espaço
-                                            ),
-                                            # Coluna dos agendamentos
-                                            ft.Container(
-                                                content=self.build_appointments_list(),
-                                                expand=2  # Ocupa 2/5 do espaço
-                                            )
-                                        ],
-                                        spacing=32,
-                                        expand=True
-                                    )
-                                ], spacing=20),
-                                padding=32,
+                                content=self.build_appointments_list(),
                                 expand=True
                             )
-                        ]),
+                        ],
+                        spacing=30,
                         expand=True
                     )
                 ],
+                spacing=20,
                 expand=True
             ),
-            expand=True
+            padding=20
         )
-
+                                            
     def build_calendar(self):
-        # Cria o grid de dias da semana
+        # Dias da semana em português
         weekdays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
-        weekday_headers = [ft.Text(day, weight=ft.FontWeight.BOLD) for day in weekdays]
-        
-        # Obtém o primeiro dia do mês atual
+        weekday_headers = [
+            ft.Container(
+                content=ft.Text(day, weight=ft.FontWeight.BOLD),
+                width=40,
+                height=30,
+                alignment=ft.alignment.center
+            ) for day in weekdays
+        ]
         first_day = self.current_date.replace(day=1)
-        # Obtém o último dia do mês atual
         last_day = (first_day.replace(month=first_day.month % 12 + 1, day=1) - timedelta(days=1)).day
-        
-        # Cria o grid de dias
         days = []
         week = []
-        
+        # Buscar todos os agendamentos do mês para destacar
+        sessoes_ctrl = SessoesController()
+        dias_com_agendamento = set()
+        for dia in range(1, last_day + 1):
+            data = first_day.replace(day=dia)
+            sessoes_do_dia = sessoes_ctrl.listar_por_dia(data)
+            if sessoes_do_dia:
+                dias_com_agendamento.add(dia)
+        # Calcula o índice do primeiro dia do mês (0=Domingo)
+        first_weekday = (first_day.weekday() + 1) % 7
         # Preenche os dias vazios até o primeiro dia do mês
-        for _ in range(first_day.weekday()):
+        for _ in range(first_weekday):
             week.append(ft.Container(
                 content=ft.Text(""),
                 width=40,
                 height=40,
                 alignment=ft.alignment.center
             ))
-        
         # Preenche os dias do mês
         for day in range(1, last_day + 1):
-            is_today = day == self.current_date.day
-            
-            day_container = ft.Container(
-                content=ft.Text(
-                    str(day),
-                    color=ft.colors.ON_PRIMARY if is_today else None,
-                    weight=ft.FontWeight.BOLD if is_today else None
-                ),
+            is_today = day == datetime.now().day and self.current_date.month == datetime.now().month and self.current_date.year == datetime.now().year
+            is_selected = day == self.current_date.day
+            highlight = day in dias_com_agendamento
+            if is_selected:
+                color = ft.colors.ON_PRIMARY
+                bgcolor = ft.colors.PRIMARY
+                border = ft.border.all(2, ft.colors.PRIMARY)
+                weight = ft.FontWeight.BOLD
+            elif is_today:
+                color = ft.colors.PRIMARY
+                bgcolor = ft.colors.SECONDARY_CONTAINER
+                border = ft.border.all(1, ft.colors.PRIMARY)
+                weight = ft.FontWeight.NORMAL
+            elif highlight:
+                color = ft.colors.ON_SURFACE
+                bgcolor = "#C8F7C5"
+                border = None
+                weight = ft.FontWeight.NORMAL
+            else:
+                color = ft.colors.ON_SURFACE
+                bgcolor = ft.colors.SURFACE
+                border = None
+                weight = ft.FontWeight.NORMAL
+            week.append(ft.Container(
+                content=ft.Text(str(day), color=color, weight=weight),
                 width=40,
                 height=40,
-                border_radius=20,
-                bgcolor=ft.colors.PRIMARY if is_today else ft.colors.SURFACE_VARIANT,
                 alignment=ft.alignment.center,
-                on_click=lambda e, d=day: self.select_date(d)
-            )
-            
-            week.append(day_container)
-            
+                bgcolor=bgcolor,
+                border_radius=8,
+                on_click=lambda e, d=day: self.select_date(d),
+                border=border
+            ))
             if len(week) == 7:
-                days.append(ft.Row(controls=week, alignment=ft.MainAxisAlignment.CENTER))
+                days.append(ft.Row(controls=week, alignment=ft.MainAxisAlignment.START))
                 week = []
-        
-        # Completa a última semana se necessário
         if week:
+            # Preenche o restante da última semana
             while len(week) < 7:
                 week.append(ft.Container(
                     content=ft.Text(""),
@@ -217,36 +188,33 @@ class AgendaView(ft.Container):
                     height=40,
                     alignment=ft.alignment.center
                 ))
-            days.append(ft.Row(controls=week, alignment=ft.MainAxisAlignment.CENTER))
-        
+            days.append(ft.Row(controls=week, alignment=ft.MainAxisAlignment.START))
         return ft.Container(
             content=ft.Column(
                 controls=[
-                    # Cabeçalho do calendário
-                    ft.Row(
-                        controls=[
-                            ft.IconButton(
-                                icon=ft.icons.ARROW_LEFT,
-                                on_click=lambda _: self.change_month(-1)
-                            ),
-                            ft.Text(
-                                self.current_date.strftime("%B %Y"),
-                                size=16,
+                    ft.Row([
+                        ft.IconButton(
+                            icon=ft.icons.ARROW_BACK,
+                            on_click=lambda _: self.change_month(-1)
+                        ),
+                        ft.Container(
+                            content=ft.Text(
+                                self.formatar_mes_ano_ptbr(self.current_date),
+                                size=20,
                                 weight=ft.FontWeight.BOLD
                             ),
-                            ft.IconButton(
-                                icon=ft.icons.ARROW_RIGHT,
-                                on_click=lambda _: self.change_month(1)
-                            )
-                        ],
-                        alignment=ft.MainAxisAlignment.CENTER
-                    ),
-                    # Dias da semana
+                            alignment=ft.alignment.center,
+                            expand=True
+                        ),
+                        ft.IconButton(
+                            icon=ft.icons.ARROW_FORWARD,
+                            on_click=lambda _: self.change_month(1)
+                        )
+                    ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                     ft.Row(
                         controls=weekday_headers,
-                        alignment=ft.MainAxisAlignment.CENTER
+                        alignment=ft.MainAxisAlignment.START
                     ),
-                    # Grid de dias
                     *days
                 ],
                 spacing=10,
@@ -257,81 +225,186 @@ class AgendaView(ft.Container):
             border_radius=8
         )
 
+    def abrir_modal_edicao(self, sessao):
+        selected_date = self.current_date
+        # Data em português
+        dias_semana = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"]
+        meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]
+        dia_semana = dias_semana[selected_date.weekday()]
+        mes = meses[selected_date.month - 1]
+        data_str = f"{dia_semana}, {selected_date.day:02} de {mes} de {selected_date.year}"
+        # Pacientes ativos
+        pacientes_ctrl = PacientesController()
+        pacientes = pacientes_ctrl.listar()
+        paciente_options = [ft.dropdown.Option(str(p.id), text=f"{p.id} - {p.name}") for p in pacientes if p.status == 1]
+        # Horários disponíveis
+        horarios = []
+        start_hour = 8
+        end_hour = 18
+        for h in range(start_hour, end_hour + 1):
+            horarios.append(f"{h:02}:00")
+        sessoes_ctrl = SessoesController()
+        sessoes_do_dia = sessoes_ctrl.listar_por_dia(selected_date)
+        horarios_ocupados = set()
+        for s in sessoes_do_dia:
+            if s['id'] == sessao['id']:
+                continue  # Ignora o próprio
+            h_existente = s['data_hora']
+            if isinstance(h_existente, str):
+                try:
+                    h_existente = datetime.strptime(h_existente, '%Y-%m-%d %H:%M:%S')
+                except Exception:
+                    continue
+            horarios_ocupados.add(h_existente.hour)
+        horarios_disponiveis = [h for h in horarios if int(h.split(':')[0]) not in horarios_ocupados or h == datetime.strptime(str(sessao['data_hora']), '%Y-%m-%d %H:%M:%S').strftime('%H:%M')]
+        # Dropdowns preenchidos
+        horario_atual = datetime.strptime(str(sessao['data_hora']), '%Y-%m-%d %H:%M:%S').strftime('%H:%M')
+        paciente_atual = str(sessao['paciente_id'])
+        horario_dd = ft.Dropdown(
+            label="Horário",
+            options=[ft.dropdown.Option(h) for h in horarios_disponiveis],
+            value=horario_atual,
+            width=200
+        )
+        paciente_dd = ft.Dropdown(
+            label="Paciente",
+            options=paciente_options,
+            value=paciente_atual,
+            width=400,
+            autofocus=True
+        )
+        erro_txt = ft.Text("", color=ft.colors.ERROR, visible=False)
+        def close_dlg(e):
+            self.content = self.build()
+            self.page.update()
+        def save_edit(e):
+            novo_paciente = paciente_dd.value
+            novo_horario = horario_dd.value
+            if not (novo_paciente and novo_horario):
+                erro_txt.value = "Preencha todos os campos."
+                erro_txt.visible = True
+                self.page.update()
+                return
+            # Checa duplicidade
+            for s in sessoes_do_dia:
+                if s['id'] != sessao['id'] and str(s['paciente_id']) == novo_paciente and datetime.strptime(str(s['data_hora']), '%Y-%m-%d %H:%M:%S').strftime('%H:%M') == novo_horario:
+                    erro_txt.value = "Já existe um agendamento para esse horário."
+                    erro_txt.visible = True
+                    self.page.update()
+                    return
+            novo_dt = selected_date.replace(hour=int(novo_horario.split(':')[0]), minute=0, second=0, microsecond=0)
+            SessoesController().editar(sessao['id'], int(novo_paciente), novo_dt)
+            close_dlg(e)
+            self.page.snack_bar = ft.SnackBar(content=ft.Text("Agendamento alterado!"), bgcolor=ft.colors.SECONDARY_CONTAINER)
+            self.page.update()
+            self.content = self.build()
+            self.page.update()
+        dlg_modal = ft.Container(
+            content=ft.Column(
+                controls=[
+                    ft.Text("Editar Agendamento", size=22, weight=ft.FontWeight.BOLD),
+                    ft.Text(f"Data selecionada: {data_str}"),
+                    horario_dd,
+                    paciente_dd,
+                    erro_txt,
+                    ft.Row([
+                        ft.TextButton("Cancelar", on_click=close_dlg),
+                        ft.TextButton("Salvar", on_click=save_edit)
+                    ], alignment=ft.MainAxisAlignment.END)
+                ],
+                tight=True,
+                spacing=20
+            ),
+            padding=30,
+            bgcolor=ft.colors.SURFACE,
+            border_radius=10,
+            alignment=ft.alignment.center,
+            expand=True
+        )
+        self.dialog_agendamento = dlg_modal
+        self.content = dlg_modal
+        self.page.update()
+
     def build_appointments_list(self):
-        # Exemplo de agendamentos (substituir por dados do banco)
-        appointments = [
-            {
-                "time": "09:00",
-                "patient": "João Silva",
-                "type": "Consulta Regular",
-                "status": "confirmed"
-            },
-            {
-                "time": "10:30",
-                "patient": "Maria Santos",
-                "type": "Avaliação",
-                "status": "pending"
-            },
-            {
-                "time": "14:00",
-                "patient": "Pedro Oliveira",
-                "type": "Retorno",
-                "status": "confirmed"
-            }
-        ]
-        
-        appointment_cards = []
-        for apt in appointments:
-            status_color = ft.colors.GREEN_400 if apt["status"] == "confirmed" else ft.colors.ORANGE_400
+        # Handlers para editar e excluir agendamento
+        def editar_agendamento(sessao):
+            # Abre modal de edição com dados preenchidos
+            self.abrir_modal_edicao(sessao)
+        def excluir_agendamento(sessao):
             
+            def confirmar_exclusao(e):
+                
+                SessoesController().excluir(sessao['id'])
+                if hasattr(self.page, 'dialog') and self.page.dialog:
+                    self.page.dialog.open = False
+                    self.page.update()
+                self.page.snack_bar = ft.SnackBar(content=ft.Text("Agendamento excluído!"), bgcolor=ft.colors.ERROR)
+                self.content = self.build()
+                self.page.update()
+            dlg = ft.AlertDialog(
+                title=ft.Text("Excluir agendamento"),
+                content=ft.Text("Tem certeza que deseja excluir este agendamento?"),
+                actions=[
+                    ft.TextButton("Cancelar", on_click=lambda e: self.fechar_dialogo()),
+                    ft.TextButton("Excluir", on_click=confirmar_exclusao)
+                ],
+                actions_alignment=ft.MainAxisAlignment.END
+            )
+            self.page.dialog = dlg
+            if hasattr(self.page, 'overlay') and isinstance(self.page.overlay, list):
+                if dlg not in self.page.overlay:
+                    self.page.overlay.append(dlg)
+            
+            self.page.dialog.open = True
+            self.page.update()
+            
+        self.editar_agendamento = editar_agendamento
+        def fechar_dialogo():
+            if hasattr(self.page, 'dialog') and self.page.dialog:
+                self.page.dialog.open = False
+                self.page.update()
+        self.fechar_dialogo = fechar_dialogo
+        self.excluir_agendamento = excluir_agendamento
+        # Buscar agendamentos reais do banco para o dia selecionado
+        sessoes_ctrl = SessoesController()
+        sessoes = sessoes_ctrl.listar_por_dia(self.current_date)
+        appointment_cards = []
+        import functools
+        for s in sessoes:
             card = ft.Container(
                 content=ft.Row(
                     controls=[
-                        # Horário
                         ft.Container(
                             content=ft.Text(
-                                apt["time"],
+                                datetime.strptime(str(s['data_hora']), '%H:%M' if len(str(s['data_hora'])) == 5 else '%Y-%m-%d %H:%M:%S').strftime('%H:%M'),
                                 size=16,
                                 weight=ft.FontWeight.BOLD
                             ),
                             width=80
                         ),
-                        # Linha vertical
-                        ft.Container(
-                            bgcolor=status_color,
-                            width=4,
-                            height=50,
-                            border_radius=2
-                        ),
-                        # Informações do agendamento
                         ft.Column(
                             controls=[
                                 ft.Text(
-                                    apt["patient"],
+                                    s['paciente_nome'],
                                     size=16,
                                     weight=ft.FontWeight.BOLD
                                 ),
-                                ft.Text(
-                                    apt["type"],
-                                    size=14,
-                                    color=ft.colors.SECONDARY
-                                )
                             ],
                             spacing=5,
-                            expand=True
                         ),
-                        # Botões de ação
                         ft.Row(
                             controls=[
                                 ft.IconButton(
                                     icon=ft.icons.EDIT_OUTLINED,
                                     tooltip="Editar",
-                                    icon_color=ft.colors.SECONDARY
+                                    icon_color=ft.colors.SECONDARY,
+                                    on_click=lambda e, sessao=s: self.editar_agendamento(sessao)
                                 ),
                                 ft.IconButton(
                                     icon=ft.icons.DELETE_OUTLINE,
                                     tooltip="Excluir",
-                                    icon_color=ft.colors.ERROR
+                                    icon_color=ft.colors.ERROR,
+                                    on_click=lambda e, sessao=s: self.excluir_agendamento(sessao)
                                 )
                             ]
                         )
@@ -340,187 +413,195 @@ class AgendaView(ft.Container):
                 ),
                 padding=15,
                 bgcolor=ft.colors.SURFACE,
-                border_radius=8,
                 margin=ft.margin.only(bottom=10)
             )
-            
             appointment_cards.append(card)
-        
+        data_str = self.current_date.strftime('%d/%m/%Y')
         return ft.Container(
             content=ft.Column(
                 controls=[
-                    ft.Container(
-                        content=ft.Row(
-                            controls=[
-                                ft.Text(
-                                    "Agendamentos do Dia",
-                                    size=20,
-                                    weight=ft.FontWeight.BOLD
-                                ),
-                                ft.Container(
-                                    content=ft.Text(
-                                        self.current_date.strftime("%d/%m/%Y"),
-                                        size=16,
-                                        color=ft.colors.SECONDARY
-                                    )
-                                )
-                            ],
-                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN
-                        ),
-                        margin=ft.margin.only(bottom=20)
+                    ft.Text(
+                        f"Agendamentos do Dia: {data_str}",
+                        size=20,
+                        weight=ft.FontWeight.BOLD
                     ),
-                    ft.Container(
-                        content=ft.Column(
-                            controls=appointment_cards,
-                            scroll=ft.ScrollMode.AUTO
-                        ),
-                        expand=True
+                    *appointment_cards,
+                    ft.Container(expand=True),
+                    ft.ElevatedButton(
+                        text="Novo agendamento",
+                        icon=ft.icons.ADD,
+                        icon_color=ft.colors.ON_PRIMARY,
+                        on_click=self.new_appointment
                     )
                 ],
-                expand=True
             ),
-            bgcolor=ft.colors.SURFACE,
-            border_radius=8,
-            padding=20,
-            expand=True
+            bgcolor=ft.colors.SURFACE
         )
 
     def new_appointment(self, e):
-        # Campos do formulário
-        date_picker = ft.DatePicker(
-            first_date=datetime.now(),
-            last_date=datetime.now() + timedelta(days=365),
-            on_change=lambda e: self.update_time_slots(e.control.value)
-        )
-        self.page.overlay.append(date_picker)
+        # 1. Data selecionada (não editável)
+        selected_date = self.current_date
+        # Data em português
+        dias_semana = ["Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado", "Domingo"]
+        meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]
+        dia_semana = dias_semana[selected_date.weekday()]
+        mes = meses[selected_date.month - 1]
+        data_str = f"{dia_semana}, {selected_date.day:02} de {mes} de {selected_date.year}"
         
-        time_dd = ft.Dropdown(
+        # 2. Buscar pacientes ativos
+        pacientes_ctrl = PacientesController()
+        pacientes = pacientes_ctrl.listar()
+        paciente_options = [ft.dropdown.Option(str(p.id), text=f"{p.id} - {p.name}") for p in pacientes if p.status == 1]
+        
+        # 3. Horários disponíveis (exemplo: 08:00 às 18:00, de hora em hora)
+        horarios = []
+        start_hour = 8
+        end_hour = 18
+        horarios = []
+        for h in range(start_hour, end_hour + 1):
+            horarios.append(f"{h:02}:00")
+        # Filtrar horários já agendados do dia
+        sessoes_ctrl = SessoesController()
+        sessoes_do_dia = sessoes_ctrl.listar_por_dia(selected_date)
+        horarios_ocupados = set()
+        for s in sessoes_do_dia:
+            h_existente = s['data_hora']
+            if isinstance(h_existente, str):
+                try:
+                    h_existente = datetime.strptime(h_existente, '%Y-%m-%d %H:%M:%S')
+                except Exception:
+                    continue
+            horarios_ocupados.add(h_existente.hour)
+        horarios_disponiveis = [h for h in horarios if int(h.split(':')[0]) not in horarios_ocupados]
+        horario_dd = ft.Dropdown(
             label="Horário",
-            options=[],
-            autofocus=True,
+            options=[ft.dropdown.Option(h) for h in horarios_disponiveis],
             width=200
         )
         
-        patient_tf = ft.TextField(
+        # 4. Dropdown de pacientes
+        paciente_dd = ft.Dropdown(
             label="Paciente",
-            width=400
-        )
-        
-        type_dd = ft.Dropdown(
-            label="Tipo",
-            width=200,
-            options=[
-                ft.dropdown.Option("Consulta Regular"),
-                ft.dropdown.Option("Avaliação"),
-                ft.dropdown.Option("Retorno")
-            ]
-        )
-        
-        notes_tf = ft.TextField(
-            label="Observações",
-            multiline=True,
-            min_lines=3,
-            max_lines=5,
-            width=400
+            options=paciente_options,
+            width=400,
+            autofocus=True
         )
         
         def close_dlg(e):
-            dlg_modal.open = False
+            self.dialog_agendamento = None
+            self.content = self.build()
             self.page.update()
         
+        erro_txt = ft.Text("", color=ft.colors.RED, visible=False)
         def save_appointment(e):
-            if not all([date_picker.value, time_dd.value, patient_tf.value, type_dd.value]):
-                self.page.show_snack_bar(ft.SnackBar(
-                    content=ft.Text("Preencha todos os campos obrigatórios"),
-                    bgcolor=ft.colors.ERROR
-                ))
+            erro_txt.visible = False
+            erro_txt.value = ""
+            if not (paciente_dd.value and horario_dd.value):
+                erro_txt.value = "Selecione paciente e horário."
+                erro_txt.visible = True
+                self.page.update()
                 return
-            
-            # TODO: Salvar agendamento no banco de dados
-            appointment_date = datetime.combine(date_picker.value, datetime.strptime(time_dd.value, "%H:%M").time())
-            new_appointment = {
-                "date": appointment_date,
-                "patient": patient_tf.value,
-                "type": type_dd.value,
-                "notes": notes_tf.value,
-                "status": "confirmed"
-            }
-            
-            # Atualiza a lista de agendamentos
-            self.appointments.append(new_appointment)
-            self.content = self.build()
-            self.update()
-            
-            # Fecha o diálogo
+            # Montar datetime
+            agendamento_dt = datetime(
+                selected_date.year, selected_date.month, selected_date.day,
+                int(horario_dd.value.split(':')[0]), 0, 0
+            )
+            # 1. Não permitir agendamento para horário anterior ou igual ao atual
+            agora = datetime.now()
+            if agendamento_dt <= agora:
+                erro_txt.value = "Não é permitido agendar para horário anterior ou igual ao atual."
+                erro_txt.visible = True
+                self.page.update()
+                return
+            # 2. Não permitir agendamento duplicado para o mesmo horário
+            sessoes_ctrl = SessoesController()
+            sessoes_do_dia = sessoes_ctrl.listar_por_dia(selected_date)
+            for s in sessoes_do_dia:
+                h_existente = s['data_hora']
+                if isinstance(h_existente, str):
+                    try:
+                        h_existente = datetime.strptime(h_existente, '%Y-%m-%d %H:%M:%S')
+                    except Exception:
+                        continue
+                if h_existente.hour == agendamento_dt.hour and h_existente.date() == agendamento_dt.date():
+                    erro_txt.value = "Já existe um agendamento para esse horário."
+                    erro_txt.visible = True
+                    self.page.update()
+                    return
+            # Salvar na tabela sessoes conforme diretrizes
+            id_pac = int(paciente_dd.value)
+            sessoes_ctrl.adicionar(id_pac, agendamento_dt)
             close_dlg(e)
-            
-            # Mostra mensagem de sucesso
-            self.page.show_snack_bar(ft.SnackBar(
+            self.page.snack_bar = ft.SnackBar(
                 content=ft.Text("Agendamento criado com sucesso!"),
                 bgcolor=ft.colors.GREEN_400
-            ))
-        
+            )
+            self.page.update()
+            # Atualizar lista de agendamentos
+            self.content = self.build()
+            self.page.update()
+
         # Diálogo modal
-        dlg_modal = ft.AlertDialog(
-            modal=True,
-            title=ft.Text("Novo Agendamento"),
+        dlg_modal = ft.Container(
             content=ft.Column(
                 controls=[
-                    ft.Row(
-                        controls=[
-                            ft.Container(
-                                content=ft.Column([
-                                    ft.Text("Data"),
-                                    ft.ElevatedButton(
-                                        "Selecionar Data",
-                                        icon=ft.icons.CALENDAR_TODAY,
-                                        on_click=lambda _: date_picker.pick_date()
-                                    )
-                                ])
-                            ),
-                            time_dd
-                        ],
-                        alignment=ft.MainAxisAlignment.START
-                    ),
-                    patient_tf,
-                    type_dd,
-                    notes_tf
+                    ft.Text("Novo Agendamento", size=22, weight=ft.FontWeight.BOLD),
+                    ft.Text(f"Data selecionada: {data_str}"),
+                    horario_dd,
+                    paciente_dd,
+                    erro_txt,
+                    ft.Row([
+                        ft.TextButton("Cancelar", on_click=close_dlg),
+                        ft.TextButton("Salvar", on_click=save_appointment)
+                    ], alignment=ft.MainAxisAlignment.END)
                 ],
                 tight=True,
                 spacing=20
             ),
-            actions=[
-                ft.TextButton("Cancelar", on_click=close_dlg),
-                ft.TextButton("Salvar", on_click=save_appointment)
-            ],
-            actions_alignment=ft.MainAxisAlignment.END
+            padding=30,
+            bgcolor=ft.colors.SURFACE,
+            border_radius=10,
+            alignment=ft.alignment.center,
+            expand=True
         )
-        
-        # Abre o diálogo
-        self.page.dialog = dlg_modal
-        dlg_modal.open = True
+        self.dialog_agendamento = dlg_modal
+        self.content = dlg_modal
         self.page.update()
-        
+
+        # Atualiza a lista de agendamentos do dia
+        if hasattr(self, 'page'):
+            # Procura o container principal e substitui o conteúdo
+            # Ajuste conforme a estrutura real do layout
+            for c in self.page.controls:
+                if hasattr(c, 'content') and isinstance(c.content, ft.Column):
+                    for idx, ctrl in enumerate(c.content.controls):
+                        if isinstance(ctrl, ft.Container) and hasattr(ctrl, 'content') and isinstance(ctrl.content, ft.Column):
+                            # Substitui o container de agendamentos
+                            c.content.controls[idx] = self.build_appointments_list()
+                            self.page.update()
+                            return
+
     def update_time_slots(self, selected_date):
         # TODO: Buscar horários disponíveis no banco de dados
         # Por enquanto, mostra horários fixos das 8h às 18h com intervalo de 30min
         time_slots = []
         current_time = datetime.strptime("08:00", "%H:%M")
         end_time = datetime.strptime("18:00", "%H:%M")
-        
         while current_time <= end_time:
             time_slots.append(ft.dropdown.Option(current_time.strftime("%H:%M")))
             current_time += timedelta(minutes=30)
-        
         # Atualiza as opções do dropdown de horários
         if hasattr(self, "page") and self.page.dialog:
             time_dd = self.page.dialog.content.controls[0].controls[1]
             time_dd.options = time_slots
             self.page.update()
+
         
     def select_date(self, day):
         self.current_date = self.current_date.replace(day=day)
-        # TODO: Atualizar lista de agendamentos para a data selecionada
+        self.content = self.build()
+        self.update()
+
         
     def change_month(self, delta):
         # Calcula o novo mês

@@ -43,12 +43,18 @@ class Database:
             """
             CREATE TABLE IF NOT EXISTS pacientes (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                nome VARCHAR(100) NOT NULL,
-                email VARCHAR(100),
+                name VARCHAR(100) NOT NULL,
+                cpf VARCHAR(20),
                 telefone VARCHAR(20),
-                data_nascimento DATE,
-                observacoes TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                cep VARCHAR(20),
+                number VARCHAR(10),
+                complement VARCHAR(50),
+                email VARCHAR(100),
+                status BOOLEAN DEFAULT 1,
+                user INT,
+                data_stamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                data_modif DATETIME,
+                user_modif INT
             )
             """,
             """
@@ -56,8 +62,7 @@ class Database:
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 paciente_id INT,
                 data_hora DATETIME NOT NULL,
-                status ENUM('agendada', 'concluida', 'cancelada') DEFAULT 'agendada',
-                observacoes TEXT,
+                status BOOLEAN DEFAULT 1,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (paciente_id) REFERENCES pacientes(id)
             )
