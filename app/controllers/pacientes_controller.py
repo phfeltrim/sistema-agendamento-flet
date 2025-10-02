@@ -1,5 +1,5 @@
-from models.paciente import Paciente
-from models.database import Database
+from ..models.paciente import Paciente
+from ..models.database import Database
 
 class PacientesController:
     def __init__(self):
@@ -75,5 +75,3 @@ class PacientesController:
         self.db.cursor.execute(query, valores)
         self.db.conn.commit()
         return True
-
-    # Não implementar/remover método de remoção!

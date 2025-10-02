@@ -1,7 +1,7 @@
 import flet as ft
 from datetime import datetime, timedelta
-from controllers.pacientes_controller import PacientesController
-from controllers.sessoes_controller import SessoesController
+from ..controllers.pacientes_controller import PacientesController
+from ..controllers.sessoes_controller import SessoesController
 
 class AgendaView(ft.Container):
     def __init__(self, page: ft.Page, on_view_change):
@@ -10,7 +10,6 @@ class AgendaView(ft.Container):
         self.on_view_change = on_view_change
         self.current_date = datetime.now()
         self.appointments = []  # Lista de agendamentos
-        # self.navigation = self.build_navigation()
         self.expand = True
         self.content = self.build()
 
@@ -28,8 +27,8 @@ class AgendaView(ft.Container):
                 ft.Container(
                     content=ft.Row(
                         controls=[
-                            ft.Icon(ft.icons.CALENDAR_MONTH, size=24, color=ft.colors.PRIMARY),
-                            ft.Text("Agenda", size=20, weight=ft.FontWeight.BOLD)
+                            ft.Icon(ft.Icons.CALENDAR_MONTH, size=24, color=ft.Colors.PRIMARY),
+                            ft.Text("Agenda", style=ft.TextThemeStyle.TITLE_MEDIUM, weight=ft.FontWeight.BOLD)
                         ],
                         spacing=10
                     ),
@@ -45,23 +44,23 @@ class AgendaView(ft.Container):
                         
                         destinations=[
                             ft.NavigationRailDestination(
-                                icon=ft.icons.CALENDAR_TODAY_OUTLINED,
-                                selected_icon=ft.icons.CALENDAR_TODAY,
+                                icon=ft.Icons.CALENDAR_TODAY_OUTLINED,
+                                selected_icon=ft.Icons.CALENDAR_TODAY,
                                 label="Agenda"
                             ),
                             ft.NavigationRailDestination(
-                                icon=ft.icons.PEOPLE_OUTLINE,
-                                selected_icon=ft.icons.PEOPLE,
+                                icon=ft.Icons.PEOPLE_OUTLINE,
+                                selected_icon=ft.Icons.PEOPLE,
                                 label="Pacientes"
                             ),
                             ft.NavigationRailDestination(
-                                icon=ft.icons.LIST_ALT_OUTLINED,
-                                selected_icon=ft.icons.LIST_ALT,
+                                icon=ft.Icons.LIST_ALT_OUTLINED,
+                                selected_icon=ft.Icons.LIST_ALT,
                                 label="Sessões"
                             ),
                             ft.NavigationRailDestination(
-                                icon=ft.icons.SETTINGS_OUTLINED,
-                                selected_icon=ft.icons.SETTINGS,
+                                icon=ft.Icons.SETTINGS_OUTLINED,
+                                selected_icon=ft.Icons.SETTINGS,
                                 label="Configurações"
                             ),
                         ],
@@ -86,7 +85,7 @@ class AgendaView(ft.Container):
             expand=True,
             content=ft.Column(
                 controls=[
-                    ft.Text("Agenda", size=30, weight=ft.FontWeight.BOLD),
+                    ft.Text("Agenda", style=ft.TextThemeStyle.TITLE_LARGE, weight=ft.FontWeight.BOLD),
                     ft.Row(
                         controls=[
                             ft.Container(
@@ -147,23 +146,23 @@ class AgendaView(ft.Container):
             is_selected = day == self.current_date.day
             highlight = day in dias_com_agendamento
             if is_selected:
-                color = ft.colors.ON_PRIMARY
-                bgcolor = ft.colors.PRIMARY
-                border = ft.border.all(2, ft.colors.PRIMARY)
+                color = ft.Colors.ON_PRIMARY
+                bgcolor = ft.Colors.PRIMARY
+                border = ft.border.all(2, ft.Colors.PRIMARY)
                 weight = ft.FontWeight.BOLD
             elif is_today:
-                color = ft.colors.PRIMARY
-                bgcolor = ft.colors.SECONDARY_CONTAINER
-                border = ft.border.all(1, ft.colors.PRIMARY)
+                color = ft.Colors.PRIMARY
+                bgcolor = ft.Colors.SECONDARY_CONTAINER
+                border = ft.border.all(1, ft.Colors.PRIMARY)
                 weight = ft.FontWeight.NORMAL
             elif highlight:
-                color = ft.colors.ON_SURFACE
+                color = ft.Colors.ON_SURFACE
                 bgcolor = "#C8F7C5"
                 border = None
                 weight = ft.FontWeight.NORMAL
             else:
-                color = ft.colors.ON_SURFACE
-                bgcolor = ft.colors.SURFACE
+                color = ft.Colors.ON_SURFACE
+                bgcolor = ft.Colors.SURFACE
                 border = None
                 weight = ft.FontWeight.NORMAL
             week.append(ft.Container(
@@ -194,20 +193,20 @@ class AgendaView(ft.Container):
                 controls=[
                     ft.Row([
                         ft.IconButton(
-                            icon=ft.icons.ARROW_BACK,
+                            icon=ft.Icons.ARROW_BACK,
                             on_click=lambda _: self.change_month(-1)
                         ),
                         ft.Container(
                             content=ft.Text(
                                 self.formatar_mes_ano_ptbr(self.current_date),
-                                size=20,
+                                style=ft.TextThemeStyle.TITLE_MEDIUM,
                                 weight=ft.FontWeight.BOLD
                             ),
                             alignment=ft.alignment.center,
                             expand=True
                         ),
                         ft.IconButton(
-                            icon=ft.icons.ARROW_FORWARD,
+                            icon=ft.Icons.ARROW_FORWARD,
                             on_click=lambda _: self.change_month(1)
                         )
                     ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
@@ -221,7 +220,7 @@ class AgendaView(ft.Container):
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER
             ),
             padding=20,
-            bgcolor=ft.colors.SURFACE,
+            bgcolor=ft.Colors.SURFACE,
             border_radius=8
         )
 
@@ -273,7 +272,7 @@ class AgendaView(ft.Container):
             width=400,
             autofocus=True
         )
-        erro_txt = ft.Text("", color=ft.colors.ERROR, visible=False)
+        erro_txt = ft.Text("", color=ft.Colors.ERROR, visible=False)
         def close_dlg(e):
             self.content = self.build()
             self.page.update()
@@ -295,14 +294,14 @@ class AgendaView(ft.Container):
             novo_dt = selected_date.replace(hour=int(novo_horario.split(':')[0]), minute=0, second=0, microsecond=0)
             SessoesController().editar(sessao['id'], int(novo_paciente), novo_dt)
             close_dlg(e)
-            self.page.snack_bar = ft.SnackBar(content=ft.Text("Agendamento alterado!"), bgcolor=ft.colors.SECONDARY_CONTAINER)
+            self.page.snack_bar = ft.SnackBar(content=ft.Text("Agendamento alterado!"), bgcolor=ft.Colors.SECONDARY_CONTAINER)
             self.page.update()
             self.content = self.build()
             self.page.update()
         dlg_modal = ft.Container(
             content=ft.Column(
                 controls=[
-                    ft.Text("Editar Agendamento", size=22, weight=ft.FontWeight.BOLD),
+                    ft.Text("Editar Agendamento", style=ft.TextThemeStyle.TITLE_MEDIUM, weight=ft.FontWeight.BOLD),
                     ft.Text(f"Data selecionada: {data_str}"),
                     horario_dd,
                     paciente_dd,
@@ -316,7 +315,7 @@ class AgendaView(ft.Container):
                 spacing=20
             ),
             padding=30,
-            bgcolor=ft.colors.SURFACE,
+            bgcolor=ft.Colors.SURFACE,
             border_radius=10,
             alignment=ft.alignment.center,
             expand=True
@@ -338,7 +337,7 @@ class AgendaView(ft.Container):
                 if hasattr(self.page, 'dialog') and self.page.dialog:
                     self.page.dialog.open = False
                     self.page.update()
-                self.page.snack_bar = ft.SnackBar(content=ft.Text("Agendamento excluído!"), bgcolor=ft.colors.ERROR)
+                self.page.snack_bar = ft.SnackBar(content=ft.Text("Agendamento excluído!"), bgcolor=ft.Colors.ERROR)
                 self.content = self.build()
                 self.page.update()
             dlg = ft.AlertDialog(
@@ -377,7 +376,7 @@ class AgendaView(ft.Container):
                         ft.Container(
                             content=ft.Text(
                                 datetime.strptime(str(s['data_hora']), '%H:%M' if len(str(s['data_hora'])) == 5 else '%Y-%m-%d %H:%M:%S').strftime('%H:%M'),
-                                size=16,
+                                style=ft.TextThemeStyle.TITLE_SMALL,
                                 weight=ft.FontWeight.BOLD
                             ),
                             width=80
@@ -386,7 +385,7 @@ class AgendaView(ft.Container):
                             controls=[
                                 ft.Text(
                                     s['paciente_nome'],
-                                    size=16,
+                                    style=ft.TextThemeStyle.TITLE_SMALL,
                                     weight=ft.FontWeight.BOLD
                                 ),
                             ],
@@ -395,15 +394,15 @@ class AgendaView(ft.Container):
                         ft.Row(
                             controls=[
                                 ft.IconButton(
-                                    icon=ft.icons.EDIT_OUTLINED,
+                                    icon=ft.Icons.EDIT_OUTLINED,
                                     tooltip="Editar",
-                                    icon_color=ft.colors.SECONDARY,
+                                    icon_color=ft.Colors.SECONDARY,
                                     on_click=lambda e, sessao=s: self.editar_agendamento(sessao)
                                 ),
                                 ft.IconButton(
-                                    icon=ft.icons.DELETE_OUTLINE,
+                                    icon=ft.Icons.DELETE_OUTLINE,
                                     tooltip="Excluir",
-                                    icon_color=ft.colors.ERROR,
+                                    icon_color=ft.Colors.ERROR,
                                     on_click=lambda e, sessao=s: self.excluir_agendamento(sessao)
                                 )
                             ]
@@ -412,7 +411,7 @@ class AgendaView(ft.Container):
                     alignment=ft.MainAxisAlignment.START
                 ),
                 padding=15,
-                bgcolor=ft.colors.SURFACE,
+                bgcolor=ft.Colors.SURFACE,
                 margin=ft.margin.only(bottom=10)
             )
             appointment_cards.append(card)
@@ -422,20 +421,20 @@ class AgendaView(ft.Container):
                 controls=[
                     ft.Text(
                         f"Agendamentos do Dia: {data_str}",
-                        size=20,
+                        style=ft.TextThemeStyle.TITLE_MEDIUM,
                         weight=ft.FontWeight.BOLD
                     ),
                     *appointment_cards,
                     ft.Container(expand=True),
                     ft.ElevatedButton(
                         text="Novo agendamento",
-                        icon=ft.icons.ADD,
-                        icon_color=ft.colors.ON_PRIMARY,
+                        icon=ft.Icons.ADD,
+                        icon_color=ft.Colors.ON_PRIMARY,
                         on_click=self.new_appointment
                     )
                 ],
             ),
-            bgcolor=ft.colors.SURFACE
+            bgcolor=ft.Colors.SURFACE
         )
 
     def new_appointment(self, e):
@@ -492,7 +491,7 @@ class AgendaView(ft.Container):
             self.content = self.build()
             self.page.update()
         
-        erro_txt = ft.Text("", color=ft.colors.RED, visible=False)
+        erro_txt = ft.Text("", color=ft.Colors.RED, visible=False)
         def save_appointment(e):
             erro_txt.visible = False
             erro_txt.value = ""
@@ -534,7 +533,7 @@ class AgendaView(ft.Container):
             close_dlg(e)
             self.page.snack_bar = ft.SnackBar(
                 content=ft.Text("Agendamento criado com sucesso!"),
-                bgcolor=ft.colors.GREEN_400
+                bgcolor=ft.Colors.GREEN_400
             )
             self.page.update()
             # Atualizar lista de agendamentos
@@ -545,7 +544,7 @@ class AgendaView(ft.Container):
         dlg_modal = ft.Container(
             content=ft.Column(
                 controls=[
-                    ft.Text("Novo Agendamento", size=22, weight=ft.FontWeight.BOLD),
+                    ft.Text("Novo Agendamento", style=ft.TextThemeStyle.TITLE_MEDIUM, weight=ft.FontWeight.BOLD),
                     ft.Text(f"Data selecionada: {data_str}"),
                     horario_dd,
                     paciente_dd,
@@ -559,7 +558,7 @@ class AgendaView(ft.Container):
                 spacing=20
             ),
             padding=30,
-            bgcolor=ft.colors.SURFACE,
+            bgcolor=ft.Colors.SURFACE,
             border_radius=10,
             alignment=ft.alignment.center,
             expand=True

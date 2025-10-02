@@ -1,4 +1,4 @@
-from models.database import Database
+from ..models.database import Database
 from datetime import datetime
 
 class SessoesController:
@@ -53,6 +53,7 @@ class SessoesController:
             JOIN pacientes p ON s.paciente_id = p.id
             WHERE DATE(s.data_hora) = %s
             ORDER BY s.data_hora
+            DESC
         '''
         values = (data.strftime('%Y-%m-%d'),)
         self.db.cursor.execute(query, values)

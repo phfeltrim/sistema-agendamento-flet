@@ -1,5 +1,5 @@
 import flet as ft
-from controllers.pacientes_controller import PacientesController
+from ..controllers.pacientes_controller import PacientesController
 
 class PacientesView(ft.Container):
     def __init__(self, page: ft.Page):
@@ -12,11 +12,11 @@ class PacientesView(ft.Container):
         # Campo de busca e botões
         self.search_field = ft.TextField(label="Buscar", hint_text="Nome, CPF ou Telefone", width=300)
         self.search_btn = ft.ElevatedButton(text="Buscar", on_click=self.search_patients)
-        self.new_btn = ft.ElevatedButton(text="Novo Paciente", icon=ft.icons.ADD, on_click=self.new_patient)
+        self.new_btn = ft.ElevatedButton(text="Novo Paciente", icon=ft.Icons.ADD, on_click=self.new_patient)
         return ft.Container(
             content=ft.Column(
                 controls=[
-                    ft.Text("Pacientes", size=30, weight=ft.FontWeight.BOLD),
+                    ft.Text("Pacientes", style=ft.TextThemeStyle.TITLE_LARGE, weight=ft.FontWeight.BOLD),
                     ft.Row([
                         self.search_field,
                         self.search_btn,
@@ -38,7 +38,7 @@ class PacientesView(ft.Container):
                     ft.DataCell(ft.Text(p.name)),
                     ft.DataCell(ft.Text(p.telefone)),
                     ft.DataCell(ft.Text(p.cpf)),
-                    ft.DataCell(ft.IconButton(icon=ft.icons.EDIT, tooltip="Editar", on_click=lambda _, pid=p.id: self.edit_patient(pid)))
+                    ft.DataCell(ft.IconButton(icon=ft.Icons.EDIT, tooltip="Editar", on_click=lambda _, pid=p.id: self.edit_patient(pid)))
                 ]
             ) for p in pacientes
         ]
@@ -67,7 +67,7 @@ class PacientesView(ft.Container):
         self.content = ft.Container(
             content=ft.Column(
                 controls=[
-                    ft.Text("Pacientes", size=30, weight=ft.FontWeight.BOLD),
+                    ft.Text("Pacientes", style=ft.TextThemeStyle.TITLE_LARGE, weight=ft.FontWeight.BOLD),
                     ft.Row([
                         self.search_field,
                         self.search_btn,
@@ -90,7 +90,7 @@ class PacientesView(ft.Container):
                                         ft.DataCell(ft.Text(p.name)),
                                         ft.DataCell(ft.Text(p.telefone)),
                                         ft.DataCell(ft.Text(p.cpf)),
-                                        ft.DataCell(ft.IconButton(icon=ft.icons.EDIT, tooltip="Editar", on_click=lambda _, pid=p.id: self.edit_patient(pid)))
+                                        ft.DataCell(ft.IconButton(icon=ft.Icons.EDIT, tooltip="Editar", on_click=lambda _, pid=p.id: self.edit_patient(pid)))
                                     ]
                                 ) for p in pacientes
                             ]
@@ -116,7 +116,7 @@ class PacientesView(ft.Container):
         complement_tf = ft.TextField(label="Complemento", value=paciente.complement, width=150)
         email_tf = ft.TextField(label="Email", value=paciente.email, width=220)
         ativo_switch = ft.Switch(label="Ativo", value=getattr(paciente, 'status', True))
-        erro_txt = ft.Text("", color=ft.colors.RED, visible=False)
+        erro_txt = ft.Text("", color=ft.Colors.RED, visible=False)
 
         def fechar(_):
             dlg.open = False
@@ -186,7 +186,7 @@ class PacientesView(ft.Container):
             number_tf = ft.TextField(label="Número", width=100)
             complement_tf = ft.TextField(label="Complemento", width=150)
             email_tf = ft.TextField(label="Email", width=220)
-            erro_txt = ft.Text("", color=ft.colors.RED, visible=False)
+            erro_txt = ft.Text("", color=ft.Colors.RED, visible=False)
 
             def fechar(_):
                 dlg.open = False

@@ -9,7 +9,7 @@ class SessoesView(ft.Container):
         self.content = self.build()
 
     def build(self):
-        from controllers.pacientes_controller import PacientesController
+        from ..controllers.pacientes_controller import PacientesController
         # Filtro por data
         filtro_data_field = ft.TextField(label="Data", read_only=True, width=150)
         filtro_date_picker = ft.DatePicker(
@@ -28,7 +28,7 @@ class SessoesView(ft.Container):
         def abrir_filtro_date_picker(e):
             filtro_date_picker.open = True
             self.page.update()
-        filtro_data_field.suffix = ft.IconButton(icon=ft.icons.CALENDAR_MONTH, on_click=abrir_filtro_date_picker)
+        filtro_data_field.suffix = ft.IconButton(icon=ft.Icons.CALENDAR_MONTH, on_click=abrir_filtro_date_picker)
         # Filtro por paciente
         pacientes_ctrl = PacientesController()
         pacientes = pacientes_ctrl.listar()
@@ -40,14 +40,14 @@ class SessoesView(ft.Container):
             ft.dropdown.Option("", text="Todos"),
             ft.dropdown.Option("1", text="Pago"),
             ft.dropdown.Option("0", text="Não pago")
-        ], value="", width=120)
+        ], value="", width=400)
         # Botão Filtrar
-        filtro_btn = ft.ElevatedButton(text="Filtrar", icon=ft.icons.SEARCH)
+        filtro_btn = ft.ElevatedButton(text="Filtrar", icon=ft.Icons.SEARCH)
         # Container de filtros
         filtro_height = 48
         def abrir_novo(ev=None):
-            from controllers.sessoes_controller import SessoesController
-            from controllers.pacientes_controller import PacientesController
+            from ..controllers.sessoes_controller import SessoesController
+            from ..controllers.pacientes_controller import PacientesController
             # Valores default
             selected_date = datetime.now()
             pacientes_ctrl = PacientesController()
@@ -75,8 +75,8 @@ class SessoesView(ft.Container):
             def abrir_date_picker(e):
                 date_picker.open = True
                 self.page.update()
-            data_field.suffix = ft.IconButton(icon=ft.icons.CALENDAR_MONTH, on_click=abrir_date_picker)
-            erro_txt = ft.Text("", color=ft.colors.ERROR, visible=False)
+            data_field.suffix = ft.IconButton(icon=ft.Icons.CALENDAR_MONTH, on_click=abrir_date_picker)
+            erro_txt = ft.Text("", color=ft.Colors.ERROR, visible=False)
             def close_dlg(ev):
                 self.content = self.build()
                 self.page.update()
@@ -106,12 +106,12 @@ class SessoesView(ft.Container):
                 novo_dt = datetime.combine(nova_data.date(), datetime.strptime(novo_horario, '%H:%M').time())
                 sessoes_ctrl.adicionar(int(novo_paciente), novo_dt, novo_status)
                 close_dlg(ev)
-                self.page.snack_bar = ft.SnackBar(content=ft.Text("Sessão cadastrada!"), bgcolor=ft.colors.SECONDARY_CONTAINER)
+                self.page.snack_bar = ft.SnackBar(content=ft.Text("Sessão cadastrada!"), bgcolor=ft.Colors.SECONDARY_CONTAINER)
                 self.page.update()
             dlg_modal = ft.Container(
                 content=ft.Column(
                     controls=[
-                        ft.Text("Nova Sessão", size=22, weight=ft.FontWeight.BOLD),
+                        ft.Text("Nova Sessão", style=ft.TextThemeStyle.TITLE_MEDIUM, weight=ft.FontWeight.BOLD),
                         data_field,
                         horario_dd,
                         paciente_dd,
@@ -129,14 +129,14 @@ class SessoesView(ft.Container):
                     spacing=20
                 ),
                 padding=30,
-                bgcolor=ft.colors.SURFACE,
+                bgcolor=ft.Colors.SURFACE,
                 border_radius=10,
                 alignment=ft.alignment.center,
                 expand=True
             )
             self.content = dlg_modal
             self.page.update()
-        btn_novo = ft.ElevatedButton(text="Novo", icon=ft.icons.ADD, on_click=abrir_novo)
+        btn_novo = ft.ElevatedButton(text="Novo", icon=ft.Icons.ADD, on_click=abrir_novo)
         filtro_height = 48
         filtros_col = ft.Column([
             ft.Row([
@@ -163,14 +163,14 @@ class SessoesView(ft.Container):
             def voltar(e=None):
                 self.content = self.build()
                 self.page.update()
-            btn_voltar = ft.ElevatedButton(text="Voltar", icon=ft.icons.ARROW_BACK, on_click=voltar)
+            btn_voltar = ft.ElevatedButton(text="Voltar", icon=ft.Icons.ARROW_BACK, on_click=voltar)
             tabela_filtrada = self.build_sessions_list(
                 filtro_data=filtro_data_field.value,
                 filtro_paciente=filtro_paciente_dd.value,
                 filtro_status=filtro_status_dd.value
             )
             self.content = ft.Column([
-                ft.Text("Sessões", size=30, weight=ft.FontWeight.BOLD),
+                ft.Text("Sessões", style=ft.TextThemeStyle.TITLE_LARGE, weight=ft.FontWeight.BOLD),
                 btn_voltar,
                 tabela_filtrada
             ], spacing=10, alignment=ft.MainAxisAlignment.START)
@@ -183,7 +183,7 @@ class SessoesView(ft.Container):
         return ft.Container(
             content=ft.Column(
                 controls=[
-                    ft.Text("Sessões", size=30, weight=ft.FontWeight.BOLD),
+                    ft.Text("Sessões", style=ft.TextThemeStyle.TITLE_LARGE, weight=ft.FontWeight.BOLD),
                     filtros_col,
                     self.build_sessions_list()
                 ],
@@ -195,8 +195,8 @@ class SessoesView(ft.Container):
 
     def editar_sessao(self, sessao, e=None):
         # Modal de edição próprio (independente do AgendaView)
-        from controllers.sessoes_controller import SessoesController
-        from controllers.pacientes_controller import PacientesController
+        from ..controllers.sessoes_controller import SessoesController
+        from ..controllers.pacientes_controller import PacientesController
         selected_date = sessao['data_hora'] if isinstance(sessao['data_hora'], datetime) else datetime.strptime(str(sessao['data_hora']), "%Y-%m-%d %H:%M:%S")
         pacientes_ctrl = PacientesController()
         pacientes = pacientes_ctrl.listar()
@@ -245,12 +245,12 @@ class SessoesView(ft.Container):
         def abrir_date_picker(e):
             date_picker.open = True
             self.page.update()
-        data_field.suffix = ft.IconButton(icon=ft.icons.CALENDAR_MONTH, on_click=abrir_date_picker)
+        data_field.suffix = ft.IconButton(icon=ft.Icons.CALENDAR_MONTH, on_click=abrir_date_picker)
 
         horario_dd = ft.Dropdown(label="Horário", options=[ft.dropdown.Option(h) for h in horarios_disponiveis], value=horario_atual, width=200)
         paciente_dd = ft.Dropdown(label="Paciente", options=paciente_options, value=paciente_atual, width=400, autofocus=True)
         status_switch = ft.Switch(label="Pago?", value=status_atual)
-        erro_txt = ft.Text("", color=ft.colors.ERROR, visible=False)
+        erro_txt = ft.Text("", color=ft.Colors.ERROR, visible=False)
         def close_dlg(ev):
             self.content = self.build()
             self.page.update()
@@ -280,12 +280,12 @@ class SessoesView(ft.Container):
             sessoes_ctrl.db.cursor.execute("UPDATE sessoes SET status=%s WHERE id=%s", (novo_status, sessao['id']))
             sessoes_ctrl.db.conn.commit()
             close_dlg(ev)
-            self.page.snack_bar = ft.SnackBar(content=ft.Text("Agendamento alterado!"), bgcolor=ft.colors.SECONDARY_CONTAINER)
+            self.page.snack_bar = ft.SnackBar(content=ft.Text("Agendamento alterado!"), bgcolor=ft.Colors.SECONDARY_CONTAINER)
             self.page.update()
         dlg_modal = ft.Container(
             content=ft.Column(
                 controls=[
-                    ft.Text("Editar Agendamento", size=22, weight=ft.FontWeight.BOLD),
+                    ft.Text("Editar Agendamento", style=ft.TextThemeStyle.TITLE_MEDIUM, weight=ft.FontWeight.BOLD),
                     data_field,
                     horario_dd,
                     paciente_dd,
@@ -303,7 +303,7 @@ class SessoesView(ft.Container):
                 spacing=20
             ),
             padding=30,
-            bgcolor=ft.colors.SURFACE,
+            bgcolor=ft.Colors.SURFACE,
             border_radius=10,
             alignment=ft.alignment.center,
             expand=True
@@ -313,13 +313,13 @@ class SessoesView(ft.Container):
 
     def excluir_sessao(self, sessao, e=None):
         # Mesmo comportamento do módulo Agenda
-        from controllers.sessoes_controller import SessoesController
+        from ..controllers.sessoes_controller import SessoesController
         def on_confirmar(e):
             SessoesController().excluir(sessao['id'])
             if hasattr(self.page, 'dialog') and self.page.dialog:
                 self.page.dialog.open = False
                 self.page.update()
-            self.page.snack_bar = ft.SnackBar(content=ft.Text("Agendamento excluído!"), bgcolor=ft.colors.ERROR)
+            self.page.snack_bar = ft.SnackBar(content=ft.Text("Agendamento excluído!"), bgcolor=ft.Colors.ERROR)
             self.content = self.build()
             self.page.update()
         def on_cancelar(e):
@@ -344,7 +344,7 @@ class SessoesView(ft.Container):
         self.page.update()
 
     def confirmar_pagamento(self, sessao, e=None):
-        from controllers.sessoes_controller import SessoesController
+        from ..controllers.sessoes_controller import SessoesController
         def on_confirmar(ev):
             sessoes_ctrl = SessoesController()
             if not sessoes_ctrl.db.connect():
@@ -377,7 +377,7 @@ class SessoesView(ft.Container):
         self.page.update()
 
     def build_sessions_list(self, filtro_data=None, filtro_paciente=None, filtro_status=None):
-        from controllers.sessoes_controller import SessoesController
+        from ..controllers.sessoes_controller import SessoesController
         sessoes_ctrl = SessoesController()
         # Buscar todas as sessões do banco
         sessoes = sessoes_ctrl.db.connect() and sessoes_ctrl.db.cursor.execute('''
@@ -426,12 +426,12 @@ class SessoesView(ft.Container):
                 ft.DataCell(
                     ft.Row([
                         ft.IconButton(
-                            icon=ft.icons.EDIT,
+                            icon=ft.Icons.EDIT,
                             tooltip="Editar",
                             on_click=lambda e, s=sessao: self.editar_sessao(s, e)
                         ),
                         ft.IconButton(
-                            icon=ft.icons.DELETE,
+                            icon=ft.Icons.DELETE,
                             tooltip="Excluir",
                             on_click=lambda e, s=sessao: self.excluir_sessao(s, e)
                         )

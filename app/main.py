@@ -1,60 +1,91 @@
 import flet as ft
-from views.login import LoginView
-from views.main_layout import MainLayout
+from .views.login import LoginView
+from .views.main_layout import MainLayout
+from .settings.themes import tema_normal, tema_alto_contraste
+import os
 
 def main(page: ft.Page):
-    import os, time
-    # Configuração da página
+    # --- Configuração da Página (mantida) ---
     page.title = "Sistema de Agendamento"
     page.theme_mode = "light"
     page.window_width = 1366
     page.window_height = 768
     page.window_resizable = True
-    page.window_min_width = 1024
-    page.window_min_height = 720
     page.padding = 0
-    page.theme = ft.Theme(
-        color_scheme_seed="#6E62E5",
-        visual_density=ft.VisualDensity.COMFORTABLE,
-        use_material3=True
-    )
-    # Configurações de fonte
+
+  
+    page.tema_normal = tema_normal
+    page.tema_alto_contraste = tema_alto_contraste
+    page.theme = page.tema_normal # Define o tema inicial
+
     page.fonts = {
         "Poppins": "https://raw.githubusercontent.com/google/fonts/main/ofl/poppins/Poppins-Regular.ttf"
     }
-    page.theme.font_family = "Poppins"
-    # Callback para quando o login for bem-sucedido
-    def show_view(view_name):
-        page.clean()
-        if view_name == "sair":
-            page.add(LoginView(page, on_login_success))
+
+    # --- Funções de Navegação e Sessão ---
+
+    def on_login_success(user: dict):
+        """
+        Callback chamado pela LoginView quando o login é bem-sucedido.
+        Armazena as informações do usuário na sessão da página.
+        """
+        page.session.set("user_id", user['id'])
+        page.session.set("user_name", user['nome'])
+        page.session.set("user_email", user['email'])
+        page.go("/agenda") # Navega para a tela principal
+
+    def on_logout():
+        """ Limpa a sessão e redireciona para a tela de login. """
+        page.session.clear()
+        page.go("/login")
+
+    def route_change(route):
+        """
+        Controla qual view é exibida com base na URL e no estado de login.
+        Esta função é o coração do novo sistema de navegação.
+        """
+        page.views.clear()
+
+        # Se o usuário não está logado, sempre mostra a tela de login
+        if not page.session.get("user_id"):
+            page.views.append(
+                ft.View(
+                    route='/login',
+                    controls=[LoginView(page, on_login_success)],
+                    padding=0
+                )
+            )
+        # Se o usuário está logado, mostra o layout principal
         else:
-            page.add(MainLayout(page, view_name, show_view))
+            view_name = page.route.strip('/').split('/')[0]
+            if not view_name: # Se a rota for apenas '/', vai para a agenda
+                view_name = "agenda"
+
+            page.views.append(
+                ft.View(
+                    route=page.route,
+                    controls=[MainLayout(page, view_name, on_navigate=page.go)],
+                    padding=0
+                )
+            )
+        
+        # Trata o caso de logout (a view_name é 'sair' no MainLayout)
+        if page.route == "/sair":
+            on_logout()
+            return # A on_logout já chama page.go, então paramos aqui
+
         page.update()
-    def on_login_success():
-        show_view("agenda")
-    # --- SEGREDO: temp.txt controla o login ---
-    temp_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "temp.txt")
-    if not os.path.exists(temp_path):
-        page.clean()
-        page.add(ft.Text("Sistema Bloqueado - Você precisa de uma licença válida para utilizar esse sistema.", color=ft.colors.ERROR, size=24))
-        page.update()
-        return
-    with open(temp_path, "r", encoding="utf-8") as f:
-        temp_content = f.read().strip()
-    if temp_content == "21031979":
-        show_view("agenda")
-        return
-    elif temp_content == "":
-        page.add(LoginView(page, on_login_success))
-        page.update()
-        return
-    else:
-        # Qualquer outro conteúdo: bloqueia
-        page.clean()
-        page.add(ft.Text("Sistema Bloqueado - Você precisa de uma licença válida para utilizar esse sistema.", color=ft.colors.ERROR, size=24))
-        page.update()
-        return
+
+    def view_pop(view):
+        """ Lida com o botão 'voltar' do navegador/desktop. """
+        page.views.pop()
+        top_view = page.views[-1]
+        page.go(top_view.route)
+
+    # --- Inicialização da Aplicação ---
+    page.on_route_change = route_change
+    page.on_view_pop = view_pop
+    page.go(page.route) # Inicia a navegação na rota atual ('/' por padrão)
 
 
 if __name__ == "__main__":

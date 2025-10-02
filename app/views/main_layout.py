@@ -1,8 +1,9 @@
 import flet as ft
-from views.agenda import AgendaView
-from views.pacientes import PacientesView
-from views.sessoes import SessoesView
-from views.configuracoes import ConfiguracoesView
+from .agenda import AgendaView
+from .pacientes import PacientesView
+from .sessoes import SessoesView
+from .configuracoes import ConfiguracoesView
+from .dashboard import DashboardView
 
 class MainLayout(ft.Container):
     def __init__(self, page: ft.Page, view_name: str, on_navigate):
@@ -15,11 +16,12 @@ class MainLayout(ft.Container):
 
     def build_navigation(self):
         nav_items = [
-            (ft.icons.CALENDAR_MONTH, "Agenda", "agenda"),
-            (ft.icons.PEOPLE, "Pacientes", "pacientes"),
-            (ft.icons.LIST_ALT, "Sessões", "sessoes"),
-            (ft.icons.SETTINGS, "Configurações", "configuracoes"),
-            (ft.icons.LOGOUT, "Sair", "sair")
+            (ft.Icons.DASHBOARD, "Dashboard", "dashboard"),
+            (ft.Icons.CALENDAR_MONTH, "Agenda", "agenda"),
+            (ft.Icons.PEOPLE, "Pacientes", "pacientes"),
+            (ft.Icons.LIST_ALT, "Sessões", "sessoes"),
+            (ft.Icons.SETTINGS, "Configurações", "configuracoes"),
+            (ft.Icons.LOGOUT, "Sair", "sair")
         ]
         selected_index = [i for i, (_, _, v) in enumerate(nav_items) if v == self.view_name]
         selected_index = selected_index[0] if selected_index else 0
@@ -27,7 +29,7 @@ class MainLayout(ft.Container):
             selected_index=selected_index,
             label_type=ft.NavigationRailLabelType.ALL,
             extended=True,
-            bgcolor=ft.colors.SURFACE_VARIANT,
+            bgcolor=ft.Colors.GREY_200,
             destinations=[
                 ft.NavigationRailDestination(icon=icon, label=label) for icon, label, _ in nav_items
             ],
@@ -35,12 +37,14 @@ class MainLayout(ft.Container):
         )
 
     def handle_navigation_change(self, e):
-        nav_items = ["agenda", "pacientes", "sessoes", "configuracoes", "sair"]
+        nav_items = ["dashboard","agenda", "pacientes", "sessoes", "configuracoes", "sair"]
         idx = e.control.selected_index
         self.on_navigate(nav_items[idx])
 
     def build_content(self):
-        if self.view_name == "agenda":
+        if self.view_name == "dashboard":
+            return DashboardView(self.page)
+        elif self.view_name == "agenda":
             return AgendaView(self.page, self.on_navigate)
         elif self.view_name == "pacientes":
             return PacientesView(self.page)
@@ -56,7 +60,7 @@ class MainLayout(ft.Container):
             ft.Container(
                 content=ft.Column([
                     ft.Container(
-                        content=ft.Icon(ft.icons.CALENDAR_MONTH, size=64, color=ft.colors.PRIMARY),
+                        content=ft.Icon(ft.Icons.CALENDAR_MONTH, size=64, color=ft.Colors.PRIMARY),
                         alignment=ft.alignment.center,
                         padding=ft.padding.only(top=30, bottom=10)
                     ),
@@ -67,7 +71,7 @@ class MainLayout(ft.Container):
                     )
                 ]),
                 width=250,
-                bgcolor=ft.colors.SURFACE_VARIANT,
+                bgcolor=ft.Colors.GREY_200,
                 height=768
             ),
             ft.Container(
