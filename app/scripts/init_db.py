@@ -1,13 +1,24 @@
 import mysql.connector
 from mysql.connector import Error
-import hashlib
+import bcrypt
+import configparser
+from pathlib import Path
+import os
 
 def create_database():
+    conn = None
+    cursor = None
     try:
+        # Encontra o config.ini na pasta raiz do projeto
+        base_dir = Path(__file__).resolve().parent.parent.parent
+        config_path = os.path.join(base_dir, 'config.ini')
+
+        config = configparser.ConfigParser()
+        config.read(config_path)
+        db_config = config['database']
+
         conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password=""
+            **{k: v for k, v in db_config.items() if k != 'database'} # Conecta sem especificar o DB
         )
         if conn.is_connected():
             cursor = conn.cursor(dictionary=True)
@@ -68,12 +79,12 @@ def create_database():
             print("Tabelas criadas com sucesso!")
             
             # Criar usuário admin padrão
-            admin_password = hashlib.sha256("admin123".encode()).hexdigest()
+            hashed_password = bcrypt.hashpw("admin123".encode('utf-8'), bcrypt.gensalt())
             try:
                 cursor.execute("""
                     INSERT INTO usuarios (nome, email, senha)
                     VALUES (%s, %s, %s)
-                """, ("Administrador", "admin@admin.com", admin_password))
+                """, ("Administrador", "admin@admin.com", hashed_password.decode('utf-8')))
                 conn.commit()
                 print("Usuário admin criado com sucesso!")
                 print("Email: admin@admin.com")
@@ -86,9 +97,10 @@ def create_database():
                     
     except Error as e:
         print(f"Erro: {e}")
-    finally:
-        if conn.is_connected():
+    finally: # Garante que a conexão seja fechada
+        if cursor:
             cursor.close()
+        if conn and conn.is_connected():
             conn.close()
 
 if __name__ == "__main__":
