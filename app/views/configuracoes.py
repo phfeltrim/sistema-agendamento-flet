@@ -1,13 +1,69 @@
 import flet as ft
 from ..controllers.auth_controller import AuthController
+from ..controllers.configuracoes_controller import ConfiguracoesController
 
 class ConfiguracoesView(ft.Container):
     def __init__(self, page: ft.Page):
         super().__init__()
         self.page = page
+        # Instancia os controllers uma única vez
         self.auth_controller = AuthController()
+        self.config_controller = ConfiguracoesController()
+
+        # Define os campos de texto como atributos da classe
+        self.valor_sessao_tf = ft.TextField(
+            label="Valor Padrão da Sessão (ex: 150.00)", 
+            prefix_text="R$",
+            keyboard_type=ft.KeyboardType.NUMBER
+        )
+        self.custo_fixo_tf = ft.TextField(
+            label="Custo Fixo Mensal (ex: 2500.00)", 
+            prefix_text="R$",
+            keyboard_type=ft.KeyboardType.NUMBER
+        )
         
         self.content = self.build()
+
+    def did_mount(self):
+        """
+        Chamado pelo Flet após a tela ser montada.
+        Carrega as configurações salvas do banco de dados.
+        """
+        print("ConfiguracoesView montada. Carregando configurações...")
+        self.valor_sessao_tf.value = self.config_controller.get_config("valor_sessao") or ""
+        self.custo_fixo_tf.value = self.config_controller.get_config("custo_fixo_mensal") or ""
+        self.update()
+
+    def save_financial_settings(self, e):
+        """Salva as configurações financeiras no banco de dados."""
+        try:
+            # Pega os valores dos campos e salva usando o controller
+            self.config_controller.set_config("valor_sessao", self.valor_sessao_tf.value)
+            self.config_controller.set_config("custo_fixo_mensal", self.custo_fixo_tf.value)
+            
+            # Mostra uma mensagem de sucesso
+            self.page.snack_bar = ft.SnackBar(content=ft.Text("Configurações financeiras salvas!"), bgcolor=ft.Colors.GREEN)
+            self.page.snack_bar.open = True
+            self.page.update()
+        except Exception as ex:
+            print(f"Erro ao salvar configurações: {ex}")
+
+    # --- Seções da Interface (UI) ---
+
+    def build_financial_settings(self):
+        """Cria a seção de configurações financeiras."""
+        return ft.Column(
+            controls=[
+                ft.Text("Financeiro", style=ft.TextThemeStyle.TITLE_LARGE),
+                self.valor_sessao_tf,
+                self.custo_fixo_tf,
+                ft.ElevatedButton(
+                    "Salvar Configurações Financeiras", 
+                    on_click=self.save_financial_settings,
+                    icon=ft.Icons.SAVE
+                )
+            ]
+        )   
 
     # --- MÉTODOS DE ACESSIBILIDADE ---
     
@@ -97,10 +153,11 @@ class ConfiguracoesView(ft.Container):
             padding=ft.padding.all(30),
             content=ft.Column(
                 controls=[
-                    # Usa o estilo de título do tema
-                    ft.Text("Configurações", style=ft.TextThemeStyle.TITLE_LARGE),
+                    ft.Text("Configurações", style=ft.TextThemeStyle.HEADLINE_LARGE),
                     ft.Divider(height=20),
                     self.build_accessibility_settings(),
+                    ft.Divider(height=20),
+                    self.build_financial_settings(), # <--- Adiciona o novo formulário
                     ft.Divider(height=20),
                     self.build_user_management(),
                 ],

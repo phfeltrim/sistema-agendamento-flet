@@ -1,3 +1,6 @@
 flet
 mysql-connector-python
 bcrypt
+mss
+pillow
+pygetwindow
