@@ -1,6 +1,9 @@
 flet
 mysql-connector-python
 bcrypt
+reportlab
+pygetwindow
 mss
 pillow
-pygetwindow
+flet_contrib
+pandas
