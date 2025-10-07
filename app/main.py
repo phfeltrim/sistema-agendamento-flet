@@ -3,6 +3,10 @@ from .views.login import LoginView
 from .views.main_layout import MainLayout
 from .settings.themes import tema_normal, tema_alto_contraste
 import os
+from dotenv import load_dotenv # Importa a biblioteca
+
+# Carrega as variáveis do arquivo .env para o ambiente
+load_dotenv()
 
 def main(page: ft.Page):
     # --- Configuração da Página (mantida) ---
@@ -30,7 +34,7 @@ def main(page: ft.Page):
         Armazena as informações do usuário na sessão da página.
         """
         page.session.set("user_id", user['id'])
-        page.session.set("user_name", user['nome'])
+        page.session.set("user_name", user['name'])
         page.session.set("user_email", user['email'])
         page.go("/agenda") # Navega para a tela principal
 

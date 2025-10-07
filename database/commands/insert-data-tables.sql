@@ -13,7 +13,7 @@ DELETE FROM `configuracoes`;
 -- INSERIR DADOS NA TABELA 'usuarios'
 -- =============================================
 -- A senha aqui é 'admin123', já convertida para o formato bcrypt.
-INSERT INTO `usuarios` (`id`, `nome`, `email`, `senha`, `created_at`) 
+INSERT INTO `usuarios` (`id`, `name`, `email`, `senha`, `created_at`) 
 VALUES
 (1, 'Administrador', 'admin@example.com', '$2b$12$DGIeA82k8Y08z7IB8s56U.V.a5Cg7.K.p2T85e54NvJSHvXf/iDXq', NOW());
 
@@ -22,11 +22,11 @@ VALUES
 -- INSERIR DADOS NA TABELA 'pacientes'
 -- =============================================
 -- Todos os pacientes são associados ao usuário com id = 1 (Administrador)
-INSERT INTO `pacientes` (`name`, `cpf`, `telefone`, `cep`, `number`, `complement`, `email`, `status`, `user`, `data_stamp`, `data_modif`, `user_modif`)
+INSERT INTO `pacientes` (`name`, `cpf`, `telefone`, `cep`, `numero`, `complemento`, `email`, `status`, `usuario_id`, `created_at`, `usuario_modificacao_id`)
 VALUES
-('Ana Silva', '111.222.333-44', '11987654321', '01001-000', '100', 'Apto 22', 'ana.silva@example.com', 1, 1, NOW(), NOW(), 1),
-('Bruno Costa', '222.333.444-55', '21912345678', '20040-030', '500', 'Sala 10', 'bruno.costa@example.com', 1, 1, NOW(), NOW(), 1),
-('Carla Dias', '333.444.555-66', '31955558888', '30110-000', '32', NULL, 'carla.dias@example.com', 0, 1, NOW(), NOW(), 1);
+('Ana Silva', '111.222.333-44', '11987654321', '01001-000', '100', 'Apto 22', 'ana.silva@example.com', 1, 1, NOW(), 1),
+('Bruno Costa', '222.333.444-55', '21912345678', '20040-030', '500', 'Sala 10', 'bruno.costa@example.com', 1, 1, NOW(), 1),
+('Carla Dias', '333.444.555-66', '31955558888', '30110-000', '32', NULL, 'carla.dias@example.com', 0, 1, NOW(), 1);
 
 
 -- =============================================

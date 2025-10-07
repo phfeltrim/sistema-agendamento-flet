@@ -27,11 +27,35 @@ class AuthController:
         if not self.db.connect():
             raise Exception("Erro ao conectar ao banco de dados.")
         senha_hash = bcrypt.hashpw(senha.encode('utf-8'), bcrypt.gensalt())
-        query = "INSERT INTO usuarios (nome, email, senha) VALUES (%s, %s, %s)"
+        query = "INSERT INTO usuarios (name, email, senha) VALUES (%s, %s, %s)"
         values = (nome, email, senha_hash)
         self.db.cursor.execute(query, values)
         self.db.conn.commit()
         return self.db.cursor.lastrowid
+
+    def editar_usuario(self, usuario_id, nome=None, senha=None):
+        """Atualiza o nome e/ou a senha de um usuário."""
+        if not self.db.connect():
+            raise Exception("Erro ao conectar ao banco de dados.")
+
+        campos = []
+        valores = []
+        if nome:
+            campos.append("name = %s")
+            valores.append(nome)
+        if senha:
+            senha_hash = bcrypt.hashpw(senha.encode('utf-8'), bcrypt.gensalt())
+            campos.append("senha = %s")
+            valores.append(senha_hash)
+
+        if not campos:
+            return False # Nada para atualizar
+
+        query = f"UPDATE usuarios SET {', '.join(campos)} WHERE id = %s"
+        valores.append(usuario_id)
+        self.db.cursor.execute(query, valores)
+        self.db.conn.commit()
+        return True
     
     def excluir_usuario(self, usuario_id: int):
         """ Exclui um usuário do banco de dados pelo seu ID. """
