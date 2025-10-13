@@ -424,6 +424,7 @@ class SessoesView(ft.Container):
             boleto_btn = ft.IconButton(
                 icon=ft.Icons.DESCRIPTION_OUTLINED,
                 tooltip="Ver Boleto",
+                icon_color=ft.Colors.BLUE_700,
                 on_click=lambda _, url=sessao.get('boleto_url'): self.page.launch_url(url),
                 visible=bool(sessao.get('boleto_url')) # O botão só é visível se houver URL
             )
