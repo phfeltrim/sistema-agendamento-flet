@@ -32,12 +32,12 @@ VALUES
 -- =============================================
 -- INSERIR DADOS NA TABELA 'sessoes'
 -- =============================================
--- As sessoes são associadas aos pacientes pelos IDs (1 para Ana, 2 para Bruno)
-INSERT INTO `sessoes` (`paciente_id`, `data_hora`, `status`, `created_at`)
+-- As sessoes são associadas aos pacientes pelos IDs (1 para Ana, 2 para Bruno). A coluna boleto_url pode ser NULL.
+INSERT INTO `sessoes` (`paciente_id`, `data_hora`, `status`, `boleto_url`, `created_at`)
 VALUES
-(1, '2025-10-05 10:00:00', 1, NOW()), -- Sessão da Ana Silva
-(1, '2025-10-12 10:00:00', 1, NOW()), -- Outra sessão da Ana Silva
-(2, '2025-10-07 14:30:00', 1, NOW()); -- Sessão do Bruno Costa
+(1, '2025-10-05 10:00:00', 1, 'https://sandbox.asaas.com/b/pdf/684591666456', NOW()), -- Sessão da Ana Silva
+(1, '2025-10-12 10:00:00', 1, 'https://sandbox.asaas.com/b/pdf/123456789012', NOW()), -- Outra sessão da Ana Silva
+(2, '2025-10-07 14:30:00', 0, 'https://sandbox.asaas.com/b/pdf/210987654321', NOW()); -- Sessão do Bruno Costa
 
 
 -- =============================================

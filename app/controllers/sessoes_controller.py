@@ -137,22 +137,25 @@ class SessoesController:
     def adicionar(self, paciente_id, data_hora):
         if not self.db.connect():
             raise Exception("Erro ao conectar ao banco de dados.")
-        query = '''
-            INSERT INTO sessoes (paciente_id, data_hora)
-            VALUES (%s, %s)
-        '''
-        values = (paciente_id, data_hora.strftime('%Y-%m-%d %H:%M:%S'))
+        
         try:
+            # 1. Gera o boleto ANTES de inserir no banco
+            dados_boleto = self._gerar_boleto(paciente_id, f"novo_agendamento_{datetime.now().timestamp()}")
+            boleto_url = dados_boleto.get("bankSlipUrl") if dados_boleto else None
+
+            # 2. Insere a sessão no banco, já com a URL do boleto
+            query = '''
+                INSERT INTO sessoes (paciente_id, data_hora, boleto_url)
+                VALUES (%s, %s, %s)
+            '''
+            values = (paciente_id, data_hora.strftime('%Y-%m-%d %H:%M:%S'), boleto_url)
+            
             self.db.cursor.execute(query, values)
             sessao_id = self.db.cursor.lastrowid
-            self.db.conn.commit()
-            
-            # Após salvar a sessão, gera o boleto
-            # Após registrar a sessão no DB (sem commitar), gera o boleto
-            dados_boleto = self._gerar_boleto(paciente_id, sessao_id)
 
-            # Se tudo deu certo, confirma a transação (salva a sessão no banco)
+            # 3. Se tudo deu certo, confirma a transação
             self.db.conn.commit()
+
             # Retorna tanto o ID da sessão quanto os dados do boleto para a interface
             return sessao_id, dados_boleto
         except Exception as e:

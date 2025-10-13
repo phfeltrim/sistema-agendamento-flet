@@ -381,7 +381,7 @@ class SessoesView(ft.Container):
         sessoes_ctrl = SessoesController()
         # Buscar todas as sessões do banco
         sessoes = sessoes_ctrl.db.connect() and sessoes_ctrl.db.cursor.execute('''
-            SELECT s.id, s.paciente_id, s.data_hora, s.status, p.name as paciente_nome
+            SELECT s.id, s.paciente_id, s.data_hora, s.status, s.boleto_url, p.name as paciente_nome
             FROM sessoes s
             JOIN pacientes p ON s.paciente_id = p.id
             ORDER BY s.data_hora DESC
@@ -419,12 +419,22 @@ class SessoesView(ft.Container):
             data_br = data_obj.strftime("%d/%m/%Y")
             status_txt = "Sim" if sessao.get('status', 0) in [1, True, '1', 'True'] else "Não"
             pode_pagar = (data_obj.date() < datetime.now().date()) and (sessao.get('status', 0) in [0, False, '0', 'False'])
+
+            # Cria o botão de boleto apenas se a URL existir
+            boleto_btn = ft.IconButton(
+                icon=ft.Icons.DESCRIPTION_OUTLINED,
+                tooltip="Ver Boleto",
+                on_click=lambda _, url=sessao.get('boleto_url'): self.page.launch_url(url),
+                visible=bool(sessao.get('boleto_url')) # O botão só é visível se houver URL
+            )
+
             rows.append(ft.DataRow(cells=[
                 ft.DataCell(ft.Text(sessao['paciente_nome'])),
                 ft.DataCell(ft.Text(data_br)),
                 ft.DataCell(ft.Text(status_txt)),
                 ft.DataCell(
                     ft.Row([
+                        boleto_btn,
                         ft.IconButton(
                             icon=ft.Icons.EDIT,
                             tooltip="Editar",
