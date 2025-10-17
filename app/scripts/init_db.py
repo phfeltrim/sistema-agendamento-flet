@@ -64,6 +64,7 @@ def create_database():
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     paciente_id INT,
                     data_hora DATETIME NOT NULL,
+                    boleto_url VARCHAR(255) NULL,
                     status TINYINT(1) DEFAULT 0,
                     observacoes TEXT,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

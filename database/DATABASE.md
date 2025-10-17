@@ -86,8 +86,9 @@ O objetivo principal é fornecer uma base de dados robusta e eficiente para arma
 | `column 1` | id          | integer   |
 | `column 2` | paciente_id | integer   |
 | `column 3` | data_hora   | datetime  |
-| `column 4` | status      | boolean   |
-| `column 5` | created_at  | timestamp |
+| `column 4` | boleto_url  | varchar   |
+| `column 5` | status      | boolean   |
+| `column 6` | created_at  | timestamp |
 
 <details><summary>Expandir imagem estrutura tabela sessoes</summary>
 
