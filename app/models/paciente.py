@@ -14,8 +14,8 @@ class Paciente:
     cpf: Optional[str] = None
     telefone: Optional[str] = None
     cep: Optional[str] = None
-    numero: Optional[str] = None
-    complemento: Optional[str] = None
+    number: Optional[str] = None
+    complement: Optional[str] = None
     email: Optional[str] = None
     data_nascimento: Optional[date] = None
     observacoes: Optional[str] = None

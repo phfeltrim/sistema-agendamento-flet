@@ -35,7 +35,7 @@ def main(page: ft.Page):
     # --- Funções de Navegação e Sessão (sem alterações) ---
     def on_login_success(user: dict):
         page.session.set("user_id", user['id'])
-        page.session.set("user_name", user['name'])
+        page.session.set("user_name", user['nome'])
         page.session.set("user_email", user['email'])
         page.go("/agenda")
 
