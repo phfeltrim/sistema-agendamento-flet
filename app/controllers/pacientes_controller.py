@@ -1,6 +1,7 @@
 from ..models.paciente import Paciente
 from ..models.database import Database
 
+
 class PacientesController:
     def __init__(self):
         self.db = Database()

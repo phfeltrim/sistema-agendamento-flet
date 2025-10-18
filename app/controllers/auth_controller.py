@@ -1,6 +1,7 @@
 import bcrypt
 from ..models.database import Database
 
+
 class AuthController:
     def __init__(self):
         self.db = Database()

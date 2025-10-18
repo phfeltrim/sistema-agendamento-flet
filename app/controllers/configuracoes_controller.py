@@ -1,5 +1,6 @@
 from ..models.database import Database
 
+
 class ConfiguracoesController:
     def __init__(self):
         self.db = Database()

@@ -1,6 +1,7 @@
 from ..models.database import Database
 from datetime import datetime
 
+
 class SessoesController:
     def __init__(self):
         self.db = Database()

@@ -2,6 +2,7 @@ from ..models.database import Database
 from .configuracoes_controller import ConfiguracoesController
 from datetime import datetime
 
+
 class DashboardController:
     def __init__(self):
         self.db = Database()
