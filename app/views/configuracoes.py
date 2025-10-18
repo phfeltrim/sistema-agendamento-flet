@@ -212,6 +212,57 @@ class ConfiguracoesView(ft.Container):
         dlg.open = True
         self.page.update()
 
+    def abrir_modal_editar_usuario(self, e, usuario: dict):
+        # Fecha o modal da lista primeiro para evitar sobreposição
+        self.fechar_modal()
+
+        nome_tf = ft.TextField(label="Nome", value=usuario['nome'], autofocus=True)
+        senha_tf = ft.TextField(label="Nova Senha (deixe em branco para não alterar)", password=True, can_reveal_password=True)
+        confirmar_senha_tf = ft.TextField(label="Confirmar Nova Senha", password=True, can_reveal_password=True)
+
+        def salvar_edicao(e):
+            # Validação de senhas
+            if senha_tf.value != confirmar_senha_tf.value:
+                self.page.snack_bar = ft.SnackBar(content=ft.Text("As senhas não coincidem!"), bgcolor=ft.Colors.ERROR)
+                self.page.snack_bar.open = True
+                self.page.update()
+                return
+
+            try:
+                # Chama o controller para editar
+                self.auth_controller.editar_usuario(
+                    usuario_id=usuario['id'],
+                    nome=nome_tf.value,
+                    senha=senha_tf.value if senha_tf.value else None # Só envia a senha se for preenchida
+                )
+                self.page.snack_bar = ft.SnackBar(content=ft.Text("Usuário atualizado com sucesso!"), bgcolor=ft.Colors.GREEN_700)
+                self.page.snack_bar.open = True
+                self.fechar_modal()
+            except Exception as ex:
+                self.page.snack_bar = ft.SnackBar(content=ft.Text(f"Erro ao atualizar usuário: {ex}"), bgcolor=ft.Colors.ERROR)
+                self.page.snack_bar.open = True
+            self.page.update()
+
+        dlg = ft.AlertDialog(
+            modal=True,
+            title=ft.Text(f"Editar Usuário: {usuario['nome']}"),
+            content=ft.Column([
+                ft.Text(f"ID: {usuario['id']} | Email: {usuario['email']}"),
+                nome_tf,
+                senha_tf,
+                confirmar_senha_tf
+            ]),
+            actions=[
+                ft.TextButton("Cancelar", on_click=self.fechar_modal),
+                ft.ElevatedButton("Salvar", on_click=salvar_edicao),
+            ],
+            actions_alignment=ft.MainAxisAlignment.END
+        )
+
+        self.page.dialog = dlg
+        dlg.open = True
+        self.page.update()
+
     def abrir_modal_lista_usuarios(self, e):
         try:
             # Usa a instância única do controller
@@ -224,9 +275,10 @@ class ConfiguracoesView(ft.Container):
                 for u in usuarios:
                     usuarios_controls.append(
                         ft.Row([
-                            ft.Text(u['nome'], width=180),
-                            ft.Text(u['email'], width=220),
-                            ft.IconButton(ft.Icons.DELETE, tooltip="Excluir Usuário", on_click=lambda e, user_id=u['id']: self.confirmar_exclusao(user_id)),
+                            ft.Text(u['nome'], expand=True),
+                            ft.Text(u['email'], expand=True),
+                            ft.IconButton(ft.icons.EDIT, tooltip="Editar Usuário", on_click=lambda e, user=u: self.abrir_modal_editar_usuario(e, user)),
+                            ft.IconButton(ft.icons.DELETE, tooltip="Excluir Usuário", icon_color=ft.colors.ERROR, on_click=lambda e, user_id=u['id']: self.confirmar_exclusao(user_id)),
                         ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
                     )
         except Exception as ex:

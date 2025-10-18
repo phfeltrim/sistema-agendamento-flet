@@ -57,16 +57,17 @@ O objetivo principal é fornecer uma base de dados robusta e eficiente para arma
 | `column 1`  | id         | integer  |
 | `column 2`  | name       | varchar  |
 | `column 3`  | cpf        | varchar  |
-| `column 4`  | telefone   | varchar  |
-| `column 5`  | cep        | varchar  |
-| `column 6`  | number     | varchar  |
-| `column 7`  | complement | varchar  |
-| `column 8`  | email      | varchar  |
-| `column 9`  | status     | boolean  |
-| `column 10` | user       | integer  |
-| `column 12` | data_stamp | datetime |
-| `column 13` | data_modif | datetime |
-| `column 14` | user_modif | integer  |
+| `column 4`  | telefone    | varchar   |
+| `column 5`  | cep         | varchar   |
+| `column 6`  | numero      | varchar   |
+| `column 7`  | complemento | varchar   |
+| `column 8`  | email       | varchar   |
+| `column 9`  | data_nascimento | date      |
+| `column 10` | observacoes | text      |
+| `column 11` | status      | tinyint   |
+| `column 12` | usuario_id  | integer   |
+| `column 13` | usuario_modificacao_id | integer   |
+| `column 14` | created_at  | timestamp |
 
 <details><summary>Expandir imagem estrutura tabela pacientes</summary>
 
@@ -85,8 +86,9 @@ O objetivo principal é fornecer uma base de dados robusta e eficiente para arma
 | `column 1` | id          | integer   |
 | `column 2` | paciente_id | integer   |
 | `column 3` | data_hora   | datetime  |
-| `column 4` | status      | boolean   |
-| `column 5` | created_at  | timestamp |
+| `column 4` | boleto_url  | varchar   |
+| `column 5` | status      | boolean   |
+| `column 6` | created_at  | timestamp |
 
 <details><summary>Expandir imagem estrutura tabela sessoes</summary>
 
@@ -103,7 +105,7 @@ O objetivo principal é fornecer uma base de dados robusta e eficiente para arma
 | `Table`    | usuarios   | type      |
 | ---------- | ---------- | --------- |
 | `column 1` | id         | integer   |
-| `column 2` | nome       | varchar   |
+| `column 2` | name       | varchar   |
 | `column 3` | email      | varchar   |
 | `column 4` | senha      | varchar   |
 | `column 5` | created_at | timestamp |

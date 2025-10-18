@@ -1,0 +1,5 @@
+flet
+mysql-connector-python
+bcrypt
+requests
+python-dotenv
