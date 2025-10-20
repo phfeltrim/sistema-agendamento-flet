@@ -1,3 +1,0 @@
-@echo off
-echo Iniciando a aplicacao...
-.\venv\Scripts\python.exe -m app.main

@@ -13,32 +13,6 @@ class AgendaView(ft.Container):
         self.expand = True
         self.content = self.build()
 
-        # Diálogo de confirmação com o link do boleto
-        self.dlg_confirmacao_boleto = ft.AlertDialog(
-            modal=True,
-            title=ft.Text("Agendamento Salvo!"),
-            content=ft.Text("O agendamento foi salvo e o boleto gerado."),
-            actions=[
-                ft.TextButton("Ver Boleto", on_click=self.abrir_boleto),
-                ft.TextButton("Fechar", on_click=self.fechar_dialogo_boleto),
-            ],
-            actions_alignment=ft.MainAxisAlignment.END,
-        )
-        self.url_boleto = "" # Armazena a URL do boleto para o botão
-
-        # Garante que o diálogo de confirmação seja adicionado ao overlay da página
-        if not hasattr(self.page, 'overlay'):
-            self.page.overlay = []
-        self.page.overlay.append(self.dlg_confirmacao_boleto)
-
-    def abrir_boleto(self, e):
-        self.page.launch_url(self.url_boleto)
-        self.fechar_dialogo_boleto(e)
-
-    def fechar_dialogo_boleto(self, e):
-        self.page.dialog.open = False
-        self.page.update()
-
     def formatar_mes_ano_ptbr(self, data):
         meses = [
             "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -512,6 +486,11 @@ class AgendaView(ft.Container):
             autofocus=True
         )
         
+        def close_dlg(e):
+            self.dialog_agendamento = None
+            self.content = self.build()
+            self.page.update()
+        
         erro_txt = ft.Text("", color=ft.Colors.RED, visible=False)
         def save_appointment(e):
             erro_txt.visible = False
@@ -549,35 +528,15 @@ class AgendaView(ft.Container):
                     self.page.update()
                     return
             # Salvar na tabela sessoes conforme diretrizes
-            sessoes_ctrl = SessoesController()
             id_pac = int(paciente_dd.value)
-            sessao_id, dados_boleto = sessoes_ctrl.adicionar(id_pac, agendamento_dt)
-
-            # 1. Fecha o modal de "Novo Agendamento" que está na tela
-            # Fecha o modal de "Novo Agendamento" que está na tela
+            sessoes_ctrl.adicionar(id_pac, agendamento_dt)
             close_dlg(e)
-
-            if sessao_id and dados_boleto and dados_boleto.get("bankSlipUrl"):
-                # 2. Se o boleto foi gerado, abre o diálogo de confirmação com o link
-                self.url_boleto = dados_boleto.get("bankSlipUrl")
-                self.page.dialog = self.dlg_confirmacao_boleto
-                self.dlg_confirmacao_boleto.open = True
-                self.page.snack_bar = ft.SnackBar(content=ft.Text("Agendamento salvo e boleto gerado!"), open=True, bgcolor=ft.Colors.GREEN_700)
-            elif sessao_id:
-                # 3. Se a sessão foi criada mas o boleto falhou, mostra uma notificação
-                # Se a sessão foi criada mas o boleto falhou, mostra uma notificação
-                self.page.snack_bar = ft.SnackBar(ft.Text("Agendamento salvo, mas houve um erro ao gerar o boleto."), open=True)
-            else:
-                # 4. Lógica de erro geral
-                # Lógica de erro geral
-                self.page.snack_bar = ft.SnackBar(ft.Text("Erro ao salvar agendamento."), open=True)
-
-            # 5. Atualiza a página para refletir as mudanças (fechar o modal e abrir o novo diálogo/snackbar)
+            self.page.snack_bar = ft.SnackBar(
+                content=ft.Text("Agendamento criado com sucesso!"),
+                bgcolor=ft.Colors.GREEN_400
+            )
             self.page.update()
-
-        def close_dlg(e):
-            # Apenas reconstrói a view principal sem salvar nada
-            self.dialog_agendamento = None
+            # Atualizar lista de agendamentos
             self.content = self.build()
             self.page.update()
 

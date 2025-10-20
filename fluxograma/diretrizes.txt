@@ -78,8 +78,8 @@ Colunas da tabela:
 - cpf (varchar): CPF do paciente;
 - telefone (varchar): Telefone do paciente;
 - cep (varchar): CEP do paciente;
-- numero (varchar): Número do endereço;
-- complemento (varchar): Complemento do endereço;
+- number (varchar): Número do endereço;
+- complement (varchar): Complemento do endereço;
 - email (varchar): Email do paciente;
 - status (bool): Status do paciente, 1 para ativo e 0 para desativado;
 - user (int, foreign key): Id do usuario;

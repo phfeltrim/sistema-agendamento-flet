@@ -1,24 +1,13 @@
 import mysql.connector
 from mysql.connector import Error
-import bcrypt
-import configparser
-from pathlib import Path
-import os
+import hashlib
 
 def create_database():
-    conn = None
-    cursor = None
     try:
-        # Encontra o config.ini na pasta raiz do projeto
-        base_dir = Path(__file__).resolve().parent.parent.parent
-        config_path = os.path.join(base_dir, 'config.ini')
-
-        config = configparser.ConfigParser()
-        config.read(config_path)
-        db_config = config['database']
-
         conn = mysql.connector.connect(
-            **{k: v for k, v in db_config.items() if k != 'database'} # Conecta sem especificar o DB
+            host="localhost",
+            user="root",
+            password=""
         )
         if conn.is_connected():
             cursor = conn.cursor(dictionary=True)
@@ -35,7 +24,7 @@ def create_database():
                 """
                 CREATE TABLE IF NOT EXISTS usuarios (
                     id INT AUTO_INCREMENT PRIMARY KEY,
-                    name VARCHAR(100) NOT NULL,
+                    nome VARCHAR(100) NOT NULL,
                     email VARCHAR(100) UNIQUE NOT NULL,
                     senha VARCHAR(255) NOT NULL,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -44,18 +33,11 @@ def create_database():
                 """
                 CREATE TABLE IF NOT EXISTS pacientes (
                     id INT AUTO_INCREMENT PRIMARY KEY,
-                    name VARCHAR(100) NOT NULL,
-                    cpf VARCHAR(14) UNIQUE,
-                    telefone VARCHAR(20),
-                    cep VARCHAR(9),
-                    numero VARCHAR(20),
-                    complemento VARCHAR(100),
+                    nome VARCHAR(100) NOT NULL,
                     email VARCHAR(100),
+                    telefone VARCHAR(20),
                     data_nascimento DATE,
                     observacoes TEXT,
-                    status TINYINT(1) DEFAULT 1,
-                    usuario_id INT,
-                    usuario_modificacao_id INT,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
                 """,
@@ -64,8 +46,7 @@ def create_database():
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     paciente_id INT,
                     data_hora DATETIME NOT NULL,
-                    boleto_url VARCHAR(255) NULL,
-                    status TINYINT(1) DEFAULT 0,
+                    status ENUM('agendada', 'concluida', 'cancelada') DEFAULT 'agendada',
                     observacoes TEXT,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (paciente_id) REFERENCES pacientes(id)
@@ -87,12 +68,12 @@ def create_database():
             print("Tabelas criadas com sucesso!")
             
             # Criar usuário admin padrão
-            hashed_password = bcrypt.hashpw("admin123".encode('utf-8'), bcrypt.gensalt())
+            admin_password = hashlib.sha256("admin123".encode()).hexdigest()
             try:
                 cursor.execute("""
-                    INSERT INTO usuarios (name, email, senha)
+                    INSERT INTO usuarios (nome, email, senha)
                     VALUES (%s, %s, %s)
-                """, ("Administrador", "admin@admin.com", hashed_password.decode('utf-8')))
+                """, ("Administrador", "admin@admin.com", admin_password))
                 conn.commit()
                 print("Usuário admin criado com sucesso!")
                 print("Email: admin@admin.com")
@@ -105,10 +86,9 @@ def create_database():
                     
     except Error as e:
         print(f"Erro: {e}")
-    finally: # Garante que a conexão seja fechada
-        if cursor:
+    finally:
+        if conn.is_connected():
             cursor.close()
-        if conn and conn.is_connected():
             conn.close()
 
 if __name__ == "__main__":

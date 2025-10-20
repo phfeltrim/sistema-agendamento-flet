@@ -3,10 +3,6 @@ from .views.login import LoginView
 from .views.main_layout import MainLayout
 from .settings.themes import tema_normal, tema_alto_contraste
 import os
-from dotenv import load_dotenv # Importa a biblioteca
-
-# Carrega as variáveis do arquivo .env para o ambiente
-load_dotenv()
 
 def main(page: ft.Page):
     # --- Configuração da Página (simplificada) ---

@@ -10,15 +10,14 @@ class Paciente:
     """
     id: int
     name: str
-    created_at: datetime
+    data_stamp: datetime 
+    number: Optional[str] = None
+    complement: Optional[str] = None
+    user: Optional[int] = None
+    user_modif: Optional[int] = None
+    data_modif: Optional[datetime] = None
     cpf: Optional[str] = None
     telefone: Optional[str] = None
     cep: Optional[str] = None
-    number: Optional[str] = None
-    complement: Optional[str] = None
     email: Optional[str] = None
-    data_nascimento: Optional[date] = None
-    observacoes: Optional[str] = None
     status: int = 1
-    usuario_id: Optional[int] = None
-    usuario_modificacao_id: Optional[int] = None
