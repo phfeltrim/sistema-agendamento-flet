@@ -10,8 +10,6 @@ class AgendaView(ft.Container):
         self.on_view_change = on_view_change
         self.current_date = datetime.now()
         self.appointments = []  # Lista de agendamentos
-        self.expand = True
-        self.content = self.build()
 
         # Diálogo de confirmação com o link do boleto
         self.dlg_confirmacao_boleto = ft.AlertDialog(
@@ -31,6 +29,8 @@ class AgendaView(ft.Container):
             self.page.overlay = []
         self.page.overlay.append(self.dlg_confirmacao_boleto)
 
+        self.content = self.build()
+
     def abrir_boleto(self, e):
         self.page.launch_url(self.url_boleto)
         self.fechar_dialogo_boleto(e)
@@ -40,91 +40,33 @@ class AgendaView(ft.Container):
         self.page.update()
 
     def formatar_mes_ano_ptbr(self, data):
-        meses = [
-            "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-            "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
-        ]
+        meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]
         return f"{meses[data.month-1]} {data.year}"
 
-    def build_navigation(self):
-        return ft.Container(
-            content=ft.Column([
-                # Logo/Título
-                ft.Container(
-                    content=ft.Row(
-                        controls=[
-                            ft.Icon(ft.Icons.CALENDAR_MONTH, size=24, color=ft.Colors.PRIMARY),
-                            ft.Text("Agenda", style=ft.TextThemeStyle.TITLE_MEDIUM, weight=ft.FontWeight.BOLD)
-                        ],
-                        spacing=10
-                    ),
-                    padding=20,
-                    margin=ft.margin.only(bottom=20)
-                ),
-                # Menu de Navegação
-                ft.Container(
-                    content=ft.NavigationRail(
-                        selected_index=0,
-                        label_type=ft.NavigationRailLabelType.ALL,
-                        extended=True,
-                        
-                        destinations=[
-                            ft.NavigationRailDestination(
-                                icon=ft.Icons.CALENDAR_TODAY_OUTLINED,
-                                selected_icon=ft.Icons.CALENDAR_TODAY,
-                                label="Agenda"
-                            ),
-                            ft.NavigationRailDestination(
-                                icon=ft.Icons.PEOPLE_OUTLINE,
-                                selected_icon=ft.Icons.PEOPLE,
-                                label="Pacientes"
-                            ),
-                            ft.NavigationRailDestination(
-                                icon=ft.Icons.LIST_ALT_OUTLINED,
-                                selected_icon=ft.Icons.LIST_ALT,
-                                label="Sessões"
-                            ),
-                            ft.NavigationRailDestination(
-                                icon=ft.Icons.SETTINGS_OUTLINED,
-                                selected_icon=ft.Icons.SETTINGS,
-                                label="Configurações"
-                            ),
-                        ],
-                        on_change=self.handle_navigation_change
-                    ),
-                    
-                )
-            ], ),
-            
-            width=250,
-            height=768  # Altura fixa igual à altura da janela
-        )
-
-    def handle_navigation_change(self, e):
-        index = e.control.selected_index
-        views = ["agenda", "pacientes", "sessoes", "configuracoes"]
-        if self.on_view_change:
-            self.on_view_change(views[index])
-
     def build(self):
+        # Verificação defensiva para self.page e self.page.width
+        is_desktop_width = False
+        if self.page and hasattr(self.page, 'width') and self.page.width is not None:
+            is_desktop_width = self.page.width >= 600
+
         return ft.Container(
             expand=True,
             content=ft.Column(
                 controls=[
-                    ft.Text("Agenda", style=ft.TextThemeStyle.TITLE_LARGE, weight=ft.FontWeight.BOLD),
-                    ft.Row(
+                    ft.Text("Agenda", style=ft.TextThemeStyle.TITLE_LARGE, weight=ft.FontWeight.BOLD, visible=is_desktop_width),
+                    ft.ResponsiveRow(
                         controls=[
                             ft.Container(
                                 content=self.build_calendar(),
-                                expand=True
+                                col={"xs": 12, "md": 6, "lg": 7} # Ocupa toda a largura em telas pequenas, e metade em telas maiores
                             ),
                             ft.Container(
                                 content=self.build_appointments_list(),
-                                expand=True
+                                col={"xs": 12, "md": 6, "lg": 5} # Ocupa toda a largura em telas pequenas, e metade em telas maiores
                             )
                         ],
                         spacing=30,
-                        expand=True
+                        vertical_alignment=ft.CrossAxisAlignment.START
                     )
                 ],
                 spacing=20,
@@ -139,7 +81,7 @@ class AgendaView(ft.Container):
         weekday_headers = [
             ft.Container(
                 content=ft.Text(day, weight=ft.FontWeight.BOLD),
-                width=40,
+                expand=True, # Usa expand em vez de largura fixa
                 height=30,
                 alignment=ft.alignment.center
             ) for day in weekdays
@@ -161,8 +103,8 @@ class AgendaView(ft.Container):
         # Preenche os dias vazios até o primeiro dia do mês
         for _ in range(first_weekday):
             week.append(ft.Container(
-                content=ft.Text(""),
-                width=40,
+                content=ft.Text(""), # Célula vazia
+                expand=True, # Usa expand em vez de largura fixa
                 height=40,
                 alignment=ft.alignment.center
             ))
@@ -193,8 +135,8 @@ class AgendaView(ft.Container):
                 weight = ft.FontWeight.NORMAL
             week.append(ft.Container(
                 content=ft.Text(str(day), color=color, weight=weight),
-                width=40,
                 height=40,
+                expand=True, # Usa expand em vez de largura fixa
                 alignment=ft.alignment.center,
                 bgcolor=bgcolor,
                 border_radius=8,
@@ -202,18 +144,18 @@ class AgendaView(ft.Container):
                 border=border
             ))
             if len(week) == 7:
-                days.append(ft.Row(controls=week, alignment=ft.MainAxisAlignment.START))
+                days.append(ft.Row(controls=week, alignment=ft.MainAxisAlignment.CENTER, spacing=4)) # Adiciona espaçamento
                 week = []
         if week:
             # Preenche o restante da última semana
             while len(week) < 7:
                 week.append(ft.Container(
                     content=ft.Text(""),
-                    width=40,
+                    expand=True, # Usa expand em vez de largura fixa
                     height=40,
                     alignment=ft.alignment.center
                 ))
-            days.append(ft.Row(controls=week, alignment=ft.MainAxisAlignment.START))
+            days.append(ft.Row(controls=week, alignment=ft.MainAxisAlignment.CENTER, spacing=4)) # Adiciona espaçamento
         return ft.Container(
             content=ft.Column(
                 controls=[
@@ -238,7 +180,8 @@ class AgendaView(ft.Container):
                     ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                     ft.Row(
                         controls=weekday_headers,
-                        alignment=ft.MainAxisAlignment.START
+                        alignment=ft.MainAxisAlignment.CENTER,
+                        spacing=4 # Adiciona espaçamento
                     ),
                     *days
                 ],

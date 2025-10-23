@@ -138,15 +138,17 @@ class SessoesView(ft.Container):
             self.page.update()
         btn_novo = ft.ElevatedButton(text="Novo", icon=ft.Icons.ADD, on_click=abrir_novo)
         filtro_height = 48
-        filtros_col = ft.Column([
-            ft.Row([
-                ft.Container(filtro_data_field, width=180, height=filtro_height, padding=ft.padding.only(right=0, left=0, top=0, bottom=0), alignment=ft.alignment.center),
-                ft.Container(filtro_paciente_dd, width=250, height=filtro_height, padding=ft.padding.only(right=0, left=0, top=0, bottom=0), alignment=ft.alignment.center),
-                ft.Container(filtro_status_dd, width=130, height=filtro_height, padding=ft.padding.only(right=0, left=0, top=0, bottom=0), alignment=ft.alignment.center),
-                ft.Container(filtro_btn, width=100, height=filtro_height, alignment=ft.alignment.center),
-                ft.Container(btn_novo, width=100, height=filtro_height, alignment=ft.alignment.center)
-            ], spacing=10, alignment=ft.MainAxisAlignment.START, vertical_alignment=ft.CrossAxisAlignment.CENTER)
-        ], spacing=5, alignment=ft.MainAxisAlignment.START)
+        filtros_row = ft.ResponsiveRow(
+            controls=[
+                ft.Container(content=filtro_data_field, col={"xs": 12, "sm": 6, "md": 3}),
+                ft.Container(content=filtro_paciente_dd, col={"xs": 12, "sm": 6, "md": 3}),
+                ft.Container(content=filtro_status_dd, col={"xs": 12, "sm": 6, "md": 2}),
+                ft.Container(content=filtro_btn, col={"xs": 6, "sm": 3, "md": 2}),
+                ft.Container(content=btn_novo, col={"xs": 6, "sm": 3, "md": 2}),
+            ],
+            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+            run_spacing=10
+        )
         filtro_status_dd.text_size = 15
         filtro_status_dd.max_lines = 1
         filtro_status_dd.autofocus = False
@@ -184,7 +186,7 @@ class SessoesView(ft.Container):
             content=ft.Column(
                 controls=[
                     ft.Text("Sessões", style=ft.TextThemeStyle.TITLE_LARGE, weight=ft.FontWeight.BOLD),
-                    filtros_col,
+                    filtros_row,
                     self.build_sessions_list()
                 ],
                 spacing=8,

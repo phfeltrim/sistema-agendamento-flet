@@ -75,7 +75,8 @@ class LoginView(ft.Container):
         return ft.Container(
             bgcolor=ft.Colors.GREY_200,
             expand=True,
-            content=ft.Row(
+            alignment=ft.alignment.center,  # Centraliza o conteúdo na página
+            content=ft.ResponsiveRow(
                 controls=[
                     # Coluna 1: Logo
                     ft.Container(
@@ -99,7 +100,7 @@ class LoginView(ft.Container):
                         ),
                         bgcolor=ft.Colors.WHITE,
                         border_radius=20,
-                        expand=True,
+                        col={"xs": 12, "sm": 12, "md": 6}, # Ocupa 12 colunas em telas pequenas, 6 em telas médias e grandes
                         alignment=ft.alignment.center,
                         padding=40
                     ),
@@ -139,11 +140,12 @@ class LoginView(ft.Container):
                                 spacing=10
                             )
                         ),
-                        expand=True,
+                        col={"xs": 12, "sm": 12, "md": 6}, # Ocupa 12 colunas em telas pequenas, 6 em telas médias e grandes
                         alignment=ft.alignment.center,
                         padding=50
                     )
                 ],
-                expand=True
+                run_spacing=20, # Espaçamento entre as colunas quando elas quebram
+                alignment=ft.MainAxisAlignment.CENTER, # Centraliza as colunas horizontalmente
             )
         )

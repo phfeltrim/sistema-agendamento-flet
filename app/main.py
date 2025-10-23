@@ -5,6 +5,7 @@ from .settings.themes import tema_normal, tema_alto_contraste
 import os
 from dotenv import load_dotenv # Importa a biblioteca
 
+
 # Carrega as variáveis do arquivo .env para o ambiente
 load_dotenv()
 
@@ -65,10 +66,13 @@ def main(page: ft.Page):
             if not view_name: # Se a rota for apenas '/', vai para a agenda
                 view_name = "agenda"
 
+            main_layout_instance = MainLayout(page, view_name, on_navigate=page.go)
+            page.drawer = main_layout_instance._build_navigation_drawer() # Atribui o drawer diretamente à página
+
             page.views.append(
                 ft.View(
                     route=page.route,
-                    controls=[MainLayout(page, view_name, on_navigate=page.go)],
+                    controls=[main_layout_instance],
                     padding=0
                 )
             )
@@ -93,4 +97,5 @@ def main(page: ft.Page):
 
 
 if __name__ == "__main__":
-    ft.app(target=main)
+    # Corrigido o argumento 'View' para 'view' e adicionada uma porta
+    ft.app(target=main, view=ft.WEB_BROWSER, port=8550)

@@ -230,7 +230,7 @@ class ConfiguracoesView(ft.Container):
         dlg = ft.AlertDialog(
             modal=True,
             title=ft.Text("Usuários Cadastrados"),
-            content=ft.Column(usuarios_controls, scroll=ft.ScrollMode.ALWAYS, width=600, height=400),
+            content=ft.Column(usuarios_controls, scroll=ft.ScrollMode.ADAPTIVE, height=400, width=self.page.width * 0.8 if self.page.width else 600),
             actions=[ft.TextButton("Fechar", on_click=self.fechar_modal)],
             actions_alignment=ft.MainAxisAlignment.END
         )

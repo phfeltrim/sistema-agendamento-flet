@@ -48,7 +48,7 @@ class AuthController:
             campos.append("senha = %s")
             valores.append(senha_hash)
 
-        if not campos:
+        if not campos: # Nothing to update
             return False # Nada para atualizar
 
         query = f"UPDATE usuarios SET {', '.join(campos)} WHERE id = %s"
