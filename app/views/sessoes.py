@@ -104,9 +104,12 @@ class SessoesView(ft.Container):
                         self.page.update()
                         return
                 novo_dt = datetime.combine(nova_data.date(), datetime.strptime(novo_horario, '%H:%M').time())
-                sessoes_ctrl.adicionar(int(novo_paciente), novo_dt, novo_status)
+                # A função adicionar no controller de sessões precisa ser ajustada para aceitar 'status'
+                # Por enquanto, vamos assumir que ela foi ajustada ou criar uma nova lógica aqui.
+                sessoes_ctrl.db.cursor.execute("INSERT INTO sessoes (paciente_id, data_hora, status) VALUES (%s, %s, %s)", (int(novo_paciente), novo_dt, novo_status))
+                sessoes_ctrl.db.conn.commit()
                 close_dlg(ev)
-                self.page.snack_bar = ft.SnackBar(content=ft.Text("Sessão cadastrada!"), bgcolor=ft.Colors.SECONDARY_CONTAINER)
+                self.page.snack_bar = ft.SnackBar(content=ft.Text("Sessão cadastrada!"), bgcolor=ft.Colors.SECONDARY_CONTAINER, open=True)
                 self.page.update()
             dlg_modal = ft.Container(
                 content=ft.Column(
@@ -378,8 +381,14 @@ class SessoesView(ft.Container):
         self.page.dialog.open = True
         self.page.update()
 
+    def _abrir_boleto_popup(self, url: str, e=None):
+        """Abre a URL do boleto em uma janela pop-up."""
+        if url:
+            self.page.launch_url(url)
+
     def build_sessions_list(self, filtro_data=None, filtro_paciente=None, filtro_status=None):
         from ..controllers.sessoes_controller import SessoesController
+        from functools import partial
         sessoes_ctrl = SessoesController()
         # Buscar todas as sessões do banco
         sessoes = sessoes_ctrl.db.connect() and sessoes_ctrl.db.cursor.execute('''
@@ -420,14 +429,13 @@ class SessoesView(ft.Container):
                 data_obj = datetime.now()
             data_br = data_obj.strftime("%d/%m/%Y")
             status_txt = "Sim" if sessao.get('status', 0) in [1, True, '1', 'True'] else "Não"
-            pode_pagar = (data_obj.date() < datetime.now().date()) and (sessao.get('status', 0) in [0, False, '0', 'False'])
 
             # Cria o botão de boleto apenas se a URL existir
             boleto_btn = ft.IconButton(
                 icon=ft.Icons.DESCRIPTION_OUTLINED,
                 tooltip="Ver Boleto",
                 icon_color=ft.Colors.BLUE_700,
-                on_click=lambda _, url=sessao.get('boleto_url'): self.page.launch_url(url),
+                on_click=partial(self._abrir_boleto_popup, sessao.get('boleto_url')),
                 visible=bool(sessao.get('boleto_url')) # O botão só é visível se houver URL
             )
 
@@ -441,12 +449,12 @@ class SessoesView(ft.Container):
                         ft.IconButton(
                             icon=ft.Icons.EDIT,
                             tooltip="Editar",
-                            on_click=lambda e, s=sessao: self.editar_sessao(s, e)
+                            on_click=partial(self.editar_sessao, sessao)
                         ),
                         ft.IconButton(
                             icon=ft.Icons.DELETE,
                             tooltip="Excluir",
-                            on_click=lambda e, s=sessao: self.excluir_sessao(s, e)
+                            on_click=partial(self.excluir_sessao, sessao)
                         )
                     ])
                 ),

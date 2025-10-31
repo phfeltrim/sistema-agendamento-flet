@@ -259,7 +259,7 @@ class ConfiguracoesView(ft.Container):
             content=ft.Text("Você tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita."),
             actions=[
                 ft.TextButton("Cancelar", on_click=self.fechar_modal),
-                ft.ElevatedButton("Excluir", on_click=deletar_confirmado, color=ft.colors.WHITE, bgcolor=ft.colors.RED),
+                ft.ElevatedButton("Excluir", on_click=deletar_confirmado, color=ft.Colors.WHITE, bgcolor=ft.Colors.RED),
             ],
             actions_alignment=ft.MainAxisAlignment.END,
         )

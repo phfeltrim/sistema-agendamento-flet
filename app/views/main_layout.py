@@ -7,7 +7,7 @@ from .dashboard import DashboardView
 class MainLayout(ft.Container):
     DESKTOP_COLLAPSE_BREAKPOINT = 1000 # Largura em pixels para recolher o menu no desktop
     def __init__(self, page: ft.Page, view_name: str, on_navigate):
-        super().__init__()
+        super().__init__(expand=True) # Garante que o layout principal ocupe todo o espaço
         self.page = page
         self.view_name = view_name
         self.on_navigate = on_navigate

@@ -57,7 +57,8 @@ def main(page: ft.Page):
                 ft.View(
                     route='/login',
                     controls=[LoginView(page, on_login_success)],
-                    padding=0
+                    padding=0,
+                    bgcolor=ft.Colors.GREY_200 # Garante que toda a view tenha a cor de fundo
                 )
             )
         # Se o usuário está logado, mostra o layout principal

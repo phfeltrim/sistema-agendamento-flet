@@ -65,7 +65,7 @@ class LoginView(ft.Container):
         else:
             # Falha no login
             self.page.snack_bar = ft.SnackBar(
-                content=ft.Text("Email ou senha inválidos"),
+                content=ft.Text("Email ou senha inválidos."),
                 bgcolor=ft.Colors.ERROR
             )
             self.page.snack_bar.open = True
@@ -74,14 +74,12 @@ class LoginView(ft.Container):
     def build(self):
         return ft.Container(
             # Um fundo mais suave para a página inteira
-            bgcolor=ft.Colors.GREY_200,
             expand=True,
             alignment=ft.alignment.center,
-            padding=20,
+            padding=20, # Adiciona um espaçamento ao redor do card
             content=ft.Card(
                 elevation=8,
                 width=450,  # Largura do card
-                height=600, # Altura do card
                 content=ft.Container( # Container para adicionar padding interno
                     padding=ft.padding.all(40),
                     content=ft.Column(
