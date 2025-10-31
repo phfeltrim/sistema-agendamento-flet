@@ -57,7 +57,10 @@ class AgendaView(ft.Container):
                     ft.ResponsiveRow(
                         controls=[
                             ft.Container(
-                                content=self.build_calendar(),
+                                content=ft.Card( # Envolve o calendário em um Card
+                                    content=self.build_calendar(),
+                                    elevation=4
+                                ),
                                 col={"xs": 12, "md": 6, "lg": 7} # Ocupa toda a largura em telas pequenas, e metade em telas maiores
                             ),
                             ft.Container(
@@ -170,14 +173,13 @@ class AgendaView(ft.Container):
                                 style=ft.TextThemeStyle.TITLE_MEDIUM,
                                 weight=ft.FontWeight.BOLD
                             ),
-                            alignment=ft.alignment.center,
-                            expand=True
+                            alignment=ft.alignment.center
                         ),
                         ft.IconButton(
                             icon=ft.Icons.ARROW_FORWARD,
                             on_click=lambda _: self.change_month(1)
                         )
-                    ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
+                    ], alignment=ft.MainAxisAlignment.CENTER),
                     ft.Row(
                         controls=weekday_headers,
                         alignment=ft.MainAxisAlignment.CENTER,
@@ -189,7 +191,6 @@ class AgendaView(ft.Container):
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER
             ),
             padding=20,
-            bgcolor=ft.Colors.SURFACE,
             border_radius=8
         )
 
