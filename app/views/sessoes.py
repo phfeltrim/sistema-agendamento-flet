@@ -14,7 +14,8 @@ class SessoesView(ft.Container):
         filtro_data_field = ft.TextField(label="Data", read_only=True, width=150)
         filtro_date_picker = ft.DatePicker(
             first_date=datetime(2020, 1, 1),
-            last_date=datetime(2100, 12, 31)
+            last_date=datetime(2100, 12, 31),
+            date_picker_entry_mode=ft.DatePickerEntryMode.CALENDAR_ONLY
         )
         if not hasattr(self.page, 'overlay'):
             self.page.overlay = []
@@ -61,7 +62,8 @@ class SessoesView(ft.Container):
             date_picker = ft.DatePicker(
                 value=selected_date,
                 first_date=datetime(2020, 1, 1),
-                last_date=datetime(2100, 12, 31)
+                last_date=datetime(2100, 12, 31),
+                date_picker_entry_mode=ft.DatePickerEntryMode.CALENDAR_ONLY
             )
             if not hasattr(self.page, 'overlay'):
                 self.page.overlay = []
@@ -232,7 +234,8 @@ class SessoesView(ft.Container):
             on_change=lambda e: data_field.update(value=e.control.value.strftime('%d/%m/%Y')),
             value=selected_date,
             first_date=datetime(2020, 1, 1),
-            last_date=datetime(2100, 12, 31)
+            last_date=datetime(2100, 12, 31),
+            date_picker_entry_mode=ft.DatePickerEntryMode.CALENDAR_ONLY
         )
         # Adiciona o date_picker ao overlay se não estiver
         if not hasattr(self.page, 'overlay'):

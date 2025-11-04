@@ -113,6 +113,7 @@ class AgendaView(ft.Container):
             is_today = day == datetime.now().day and self.current_date.month == datetime.now().month and self.current_date.year == datetime.now().year
             is_selected = day == self.current_date.day
             highlight = day in dias_com_agendamento
+
             if is_selected:
                 color = ft.Colors.ON_PRIMARY
                 bgcolor = ft.Colors.PRIMARY
@@ -171,13 +172,12 @@ class AgendaView(ft.Container):
                                 weight=ft.FontWeight.BOLD
                             ),
                             alignment=ft.alignment.center,
-                            expand=True
                         ),
                         ft.IconButton(
                             icon=ft.Icons.ARROW_FORWARD,
                             on_click=lambda _: self.change_month(1)
                         )
-                    ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
+                    ], alignment=ft.MainAxisAlignment.CENTER, spacing=10),
                     ft.Row(
                         controls=weekday_headers,
                         alignment=ft.MainAxisAlignment.CENTER,
@@ -385,6 +385,7 @@ class AgendaView(ft.Container):
             )
             appointment_cards.append(card)
         data_str = self.current_date.strftime('%d/%m/%Y')
+
         return ft.Container(
             content=ft.Column(
                 controls=[
