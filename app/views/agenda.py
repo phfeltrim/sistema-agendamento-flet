@@ -403,27 +403,38 @@ class AgendaView(ft.Container):
         data_str = self.current_date.strftime('%d/%m/%Y')
         
         # Verifica se a data atual é um final de semana para desabilitar o botão
+        is_past_date = self.current_date.date() < datetime.now().date()
         is_weekend = self.current_date.weekday() in [5, 6]
 
         # Define o controle a ser exibido: o botão ou a mensagem de aviso
-        if is_weekend:
+        if is_past_date:
+            action_control = ft.Container(
+                content=ft.Text(
+                    "Não é possível agendar em datas retroativas.",
+                    italic=True,
+                    color="#CC000000" # Preto com 80% de opacidade
+                ),
+                alignment=ft.alignment.center,
+                padding=ft.padding.only(top=10, bottom=10)
+            )
+        elif is_weekend:
             action_control = ft.Container(
                 content=ft.Text(
                     "Não fazemos agendamentos aos finais de semana.",
                     italic=True,
                     # CC = 80% de opacidade
-                    color="#CC000000"
+                    color="#CC000000" 
                 ),
                 alignment=ft.alignment.center,
                 padding=ft.padding.only(top=10, bottom=10)
             )
         else:
             action_control = ft.ElevatedButton(
-                text="Novo agendamento",
+                text="Novo Agendamento",
                 icon=ft.Icons.ADD,
                 icon_color=ft.Colors.ON_PRIMARY,
                 on_click=self.new_appointment,
-                tooltip="Criar um novo agendamento para este dia"
+                tooltip="Criar um novo agendamento para este dia",
             )
 
         return ft.Container(
@@ -443,6 +454,14 @@ class AgendaView(ft.Container):
         )
 
     def new_appointment(self, e):
+        # Dupla verificação para garantir que não se agende em datas passadas
+        if self.current_date.date() < datetime.now().date():
+            self.page.snack_bar = ft.SnackBar(
+                ft.Text("Não é possível criar agendamentos para datas retroativas."), open=True
+            )
+            self.page.update()
+            return
+
         # Verificação para não permitir agendamentos aos finais de semana
         if self.current_date.weekday() in [5, 6]: # 5 = Sábado, 6 = Domingo
             self.page.snack_bar = ft.SnackBar(ft.Text("Não é possível agendar em finais de semana."), open=True)
@@ -482,7 +501,20 @@ class AgendaView(ft.Container):
                 except Exception:
                     continue
             horarios_ocupados.add(h_existente.hour)
-        horarios_disponiveis = [h for h in horarios if int(h.split(':')[0]) not in horarios_ocupados]
+        
+        # Lógica para filtrar horários passados apenas se o agendamento for para o dia de hoje
+        agora = datetime.now()
+        horarios_disponiveis = []
+        if selected_date.date() == agora.date():
+            # Se for hoje, mostra apenas horários futuros e que não estão ocupados
+            for h_str in horarios:
+                hora = int(h_str.split(':')[0])
+                if hora > agora.hour and hora not in horarios_ocupados:
+                    horarios_disponiveis.append(h_str)
+        else:
+            # Se for um dia futuro, mostra todos os horários que não estão ocupados
+            horarios_disponiveis = [h for h in horarios if int(h.split(':')[0]) not in horarios_ocupados]
+
         horario_dd = ft.Dropdown(
             label="Horário",
             options=[ft.dropdown.Option(h) for h in horarios_disponiveis],
@@ -623,8 +655,15 @@ class AgendaView(ft.Container):
 
         
     def select_date(self, day):
-        # Adiciona uma verificação para não selecionar finais de semana, caso o on_click não seja None
         new_date = self.current_date.replace(day=day)
+
+        # Bloqueia seleção de datas passadas
+        if new_date.date() < datetime.now().date():
+            self.page.snack_bar = ft.SnackBar(ft.Text("Não é possível selecionar datas retroativas."), open=True)
+            self.page.update()
+            return
+
+        # Adiciona uma verificação para não selecionar finais de semana, caso o on_click não seja None
         if new_date.weekday() in [5, 6]: # 5 = Sábado, 6 = Domingo
             self.page.snack_bar = ft.SnackBar(ft.Text("Não é possível selecionar finais de semana."), open=True)
             self.page.update()
