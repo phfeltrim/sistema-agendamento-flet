@@ -154,11 +154,16 @@ class MainLayout(ft.Container):
         nav_items = ["dashboard", "agenda", "pacientes", "sessoes", "configuracoes", "sair"]
         idx = e.control.selected_index
         new_view_name = nav_items[idx]
-        if new_view_name != self.view_name:
-            self.view_name = new_view_name
-            self._update_main_content_area() # Atualiza o conteúdo da área principal
+        
+        # Se o nome da nova view for o mesmo da atual, força a reconstrução do conteúdo.
+        # Isso é crucial para "resetar" a view quando um formulário (como o de novo agendamento)
+        # substituiu o conteúdo original da tela.
+        if new_view_name == self.view_name:
+            self._update_main_content_area()
             self.update()
-        self.on_navigate(new_view_name)
+        else:
+            # Se for uma view diferente, navega normalmente.
+            self.on_navigate(new_view_name)
 
     def _update_main_content_area(self):
         """Instantiates and sets the content of the main content area based on view_name."""
