@@ -120,6 +120,7 @@ class AgendaView(ft.Container):
             date_for_day = self.current_date.replace(day=day)
             # 0 = Domingo, 6 = Sábado
             is_weekend = date_for_day.weekday() in [5, 6]
+            is_past_date = date_for_day.date() < datetime.now().date()
 
             on_click_handler = lambda e, d=day: self.select_date(d)
 
@@ -150,6 +151,13 @@ class AgendaView(ft.Container):
                 color = "#80000000"  # Cor do texto com opacidade
                 bgcolor = "#80E0E0E0" # Cor de fundo com opacidade
                 on_click_handler = None # Impede o clique
+
+            if is_past_date:
+                # Deixa o dia com aparência desabilitada e remove o clique
+                color = "#4D000000"  # Cor do texto (preto) com 30% de opacidade
+                bgcolor = "#0D000000" # Cor de fundo (preto) com 5% de opacidade
+                on_click_handler = None # Impede o clique
+                border = None
 
             week.append(ft.Container(
                 content=ft.Text(str(day), color=color, weight=weight),
@@ -305,12 +313,12 @@ class AgendaView(ft.Container):
             alignment=ft.alignment.center,
             expand=True
         )
-        self.dialog_agendamento = dlg_modal
         self.content = dlg_modal
         self.page.update()
 
     def build_appointments_list(self):
-        # Handlers para editar e excluir agendamento
+        # Handlers para editar e excluir agendamento (inner functions)
+        
         def editar_agendamento(sessao):
             # Abre modal de edição com dados preenchidos
             self.abrir_modal_edicao(sessao)
@@ -406,6 +414,32 @@ class AgendaView(ft.Container):
         is_past_date = self.current_date.date() < datetime.now().date()
         is_weekend = self.current_date.weekday() in [5, 6]
 
+        # Lógica para verificar horários disponíveis e definir o controle de ação
+        horarios_disponiveis = []
+        if not is_past_date and not is_weekend:
+            horarios = [f"{h:02}:00" for h in range(8, 19)]
+            sessoes_do_dia = sessoes_ctrl.listar_por_dia(self.current_date)
+            horarios_ocupados = {
+                (datetime.strptime(str(s['data_hora']), '%Y-%m-%d %H:%M:%S')).hour
+                for s in sessoes_do_dia
+            }
+
+            agora = datetime.now()
+            if self.current_date.date() == agora.date():
+                # Se for hoje, considera apenas horários futuros
+                horarios_disponiveis = [
+                    h for h in horarios
+                    if int(h.split(':')[0]) > agora.hour and int(h.split(':')[0]) not in horarios_ocupados
+                ]
+            else:
+                # Se for um dia futuro, considera todos os horários não ocupados
+                horarios_disponiveis = [
+                    h for h in horarios
+                    if int(h.split(':')[0]) not in horarios_ocupados
+                ]
+
+        # --- Define o controle a ser exibido com base nas verificações ---
+
         # Define o controle a ser exibido: o botão ou a mensagem de aviso
         if is_past_date:
             action_control = ft.Container(
@@ -424,6 +458,16 @@ class AgendaView(ft.Container):
                     italic=True,
                     # CC = 80% de opacidade
                     color="#CC000000" 
+                ),
+                alignment=ft.alignment.center,
+                padding=ft.padding.only(top=10, bottom=10)
+            )
+        elif not horarios_disponiveis and not is_weekend:
+            action_control = ft.Container(
+                content=ft.Text(
+                    "Não há mais horários disponíveis para este dia.",
+                    italic=True,
+                    color="#CC000000"
                 ),
                 alignment=ft.alignment.center,
                 padding=ft.padding.only(top=10, bottom=10)
@@ -515,6 +559,14 @@ class AgendaView(ft.Container):
             # Se for um dia futuro, mostra todos os horários que não estão ocupados
             horarios_disponiveis = [h for h in horarios if int(h.split(':')[0]) not in horarios_ocupados]
 
+        # Verifica se há horários disponíveis antes de abrir o modal
+        if not horarios_disponiveis:
+            self.page.snack_bar = ft.SnackBar(
+                ft.Text("Não há mais horários disponíveis para este dia."), open=True
+            )
+            self.page.update()
+            return
+
         horario_dd = ft.Dropdown(
             label="Horário",
             options=[ft.dropdown.Option(h) for h in horarios_disponiveis],
@@ -573,7 +625,6 @@ class AgendaView(ft.Container):
             # 1. Fecha o modal de "Novo Agendamento" que está na tela
             # Fecha o modal de "Novo Agendamento" que está na tela
             close_dlg(e)
-
             if sessao_id and dados_boleto and dados_boleto.get("bankSlipUrl"):
                 # 2. Se o boleto foi gerado, abre o diálogo de confirmação com o link
                 self.url_boleto = dados_boleto.get("bankSlipUrl")
@@ -581,20 +632,18 @@ class AgendaView(ft.Container):
                 self.dlg_confirmacao_boleto.open = True
                 self.page.snack_bar = ft.SnackBar(content=ft.Text("Agendamento salvo e boleto gerado!"), open=True, bgcolor=ft.Colors.GREEN_700)
             elif sessao_id:
-                # 3. Se a sessão foi criada mas o boleto falhou, mostra uma notificação
                 # Se a sessão foi criada mas o boleto falhou, mostra uma notificação
                 self.page.snack_bar = ft.SnackBar(ft.Text("Agendamento salvo, mas houve um erro ao gerar o boleto."), open=True)
             else:
-                # 4. Lógica de erro geral
                 # Lógica de erro geral
                 self.page.snack_bar = ft.SnackBar(ft.Text("Erro ao salvar agendamento."), open=True)
 
-            # 5. Atualiza a página para refletir as mudanças (fechar o modal e abrir o novo diálogo/snackbar)
+            # Atualiza a página para refletir as mudanças
+            self.content = self.build() # Reconstrói a view principal para atualizar a lista
             self.page.update()
 
         def close_dlg(e):
             # Apenas reconstrói a view principal sem salvar nada
-            self.dialog_agendamento = None
             self.content = self.build()
             self.page.update()
 
@@ -621,22 +670,10 @@ class AgendaView(ft.Container):
             alignment=ft.alignment.center,
             expand=True
         )
-        self.dialog_agendamento = dlg_modal
+
+        # Substitui o conteúdo da tela pelo modal
         self.content = dlg_modal
         self.page.update()
-
-        # Atualiza a lista de agendamentos do dia
-        if hasattr(self, 'page'):
-            # Procura o container principal e substitui o conteúdo
-            # Ajuste conforme a estrutura real do layout
-            for c in self.page.controls:
-                if hasattr(c, 'content') and isinstance(c.content, ft.Column):
-                    for idx, ctrl in enumerate(c.content.controls):
-                        if isinstance(ctrl, ft.Container) and hasattr(ctrl, 'content') and isinstance(ctrl.content, ft.Column):
-                            # Substitui o container de agendamentos
-                            c.content.controls[idx] = self.build_appointments_list()
-                            self.page.update()
-                            return
 
     def update_time_slots(self, selected_date):
         # TODO: Buscar horários disponíveis no banco de dados

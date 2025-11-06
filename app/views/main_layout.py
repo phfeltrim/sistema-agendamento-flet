@@ -45,11 +45,10 @@ class MainLayout(ft.Container):
         # Define o conteúdo inicial para a área principal com base no view_name atual
         self._update_main_content_area()
         
-        # A construção do layout agora é feita em _on_page_resize para garantir que page.width esteja disponível
-        self.content = ft.Container() # Inicia com um container vazio
-
+        # Garante que o layout seja construído na inicialização
+        self.content = self._build_layout_structure()
         self.page.on_resize = self._on_page_resize
-        # Chama o resize uma vez para configurar o layout inicial corretamente
+        # Chama o resize para ajustar o layout se a largura da página já estiver disponível
         self._on_page_resize()
 
     def _on_page_resize(self, e=None):
@@ -82,7 +81,7 @@ class MainLayout(ft.Container):
             self.navigation_container.width = 250 if self.menu_expanded else 72
             self.navigation_column.controls[0].alignment = ft.MainAxisAlignment.START if self.menu_expanded else ft.MainAxisAlignment.CENTER
 
-            self.content = self._build_layout_structure()
+            self.content.controls = self._build_layout_structure().controls
             self.page.appbar = self.get_appbar_for_view()
             if self.page.drawer is None:
                 self.page.drawer = self._build_navigation_drawer()
@@ -183,8 +182,13 @@ class MainLayout(ft.Container):
         is_mobile = self.page.width is not None and self.page.width <= 768
         if is_mobile:
             return self.main_content_area
-        else:
-            return ft.Row(controls=[self.navigation_container, self.main_content_area], expand=True)
+        
+        # Retorna um ft.Row para desktop. Se self.content já for um ft.Row,
+        # isso garante que a estrutura seja mantida.
+        return ft.Row(
+            controls=[self.navigation_container, self.main_content_area], 
+            expand=True
+        )
 
     def get_appbar_for_view(self):
         is_mobile = self.page.width is not None and self.page.width <= 768
