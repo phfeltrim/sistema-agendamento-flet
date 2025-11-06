@@ -65,7 +65,7 @@ class LoginView(ft.Container):
         else:
             # Falha no login
             self.page.snack_bar = ft.SnackBar(
-                content=ft.Text("Email ou senha inválidos"),
+                content=ft.Text("Email ou senha inválidos."),
                 bgcolor=ft.Colors.ERROR
             )
             self.page.snack_bar.open = True
@@ -73,79 +73,46 @@ class LoginView(ft.Container):
 
     def build(self):
         return ft.Container(
-            bgcolor=ft.Colors.GREY_200,
+            # Um fundo mais suave para a página inteira
             expand=True,
-            alignment=ft.alignment.center,  # Centraliza o conteúdo na página
-            content=ft.ResponsiveRow(
-                controls=[
-                    # Coluna 1: Logo
-                    ft.Container(
-                        content=ft.Column(
-                            controls=[
-                                ft.Icon(
-                                    ft.Icons.CALENDAR_MONTH,
-                                    size=64,
-                                    color=ft.Colors.PRIMARY
-                                ),
-                                ft.Text(
-                                    "Sistema de Agendamento",
-                                    size=32,
-                                    weight=ft.FontWeight.BOLD,
-                                    color=ft.Colors.PRIMARY
-                                )
-                            ],
-                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                            alignment=ft.MainAxisAlignment.CENTER,
-                            spacing=20
+            alignment=ft.alignment.center,
+            padding=20, # Adiciona um espaçamento ao redor do card
+            content=ft.Card(
+                elevation=8,
+                width=450,  # Largura do card
+                content=ft.Container( # Container para adicionar padding interno
+                    padding=ft.padding.all(40),
+                    content=ft.Column(
+                    controls=[
+                        # Unificando tudo em uma única coluna
+                        ft.Icon(ft.Icons.CALENDAR_MONTH_ROUNDED, size=64, color=ft.Colors.PRIMARY),
+                        ft.Text(
+                            "Sistema de Agendamento",
+                            style=ft.TextThemeStyle.HEADLINE_SMALL,
+                            weight=ft.FontWeight.BOLD,
+                            color=ft.Colors.PRIMARY
                         ),
-                        bgcolor=ft.Colors.WHITE,
-                        border_radius=20,
-                        col={"xs": 12, "sm": 12, "md": 6}, # Ocupa 12 colunas em telas pequenas, 6 em telas médias e grandes
-                        alignment=ft.alignment.center,
-                        padding=40
-                    ),
-                    # Coluna 2: Formulário de login
-                    ft.Container(
-                        content=ft.Container(
-                            bgcolor=ft.Colors.GREY_100,
-                            border_radius=20,
-                            padding=40,
-                            content=ft.Column(
-                                controls=[
-                                    ft.Text(
-                                        "Bem-vindo!",
-                                        size=28,
-                                        weight=ft.FontWeight.BOLD
-                                    ),
-                                    ft.Container(height=20),
-                                    # Usa os campos de texto definidos no __init__
-                                    self.login_field,
-                                    self.password_field,
-                                    ft.Container(height=20),
-                                    ft.ElevatedButton(
-                                        content=ft.Text(
-                                            "Acessar",
-                                            size=16,
-                                            weight=ft.FontWeight.W_500
-                                        ),
-                                        style=ft.ButtonStyle(
-                                            shape=ft.RoundedRectangleBorder(radius=8),
-                                            padding=ft.padding.symmetric(horizontal=24, vertical=16)
-                                        ),
-                                        on_click=self.login,
-                                        width=300
-                                    )
-                                ],
-                                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                                spacing=10
+                        ft.Container(height=20),
+                        ft.Text("Acesse sua conta para continuar.", style=ft.TextThemeStyle.BODY_LARGE),
+                        ft.Container(height=10),
+                        self.login_field,
+                        self.password_field,
+                        ft.Container(height=20),
+                        ft.ElevatedButton(
+                            text="Acessar",
+                            icon=ft.Icons.LOGIN,
+                            on_click=self.login,
+                            width=300,
+                            height=48,
+                            style=ft.ButtonStyle(
+                                shape=ft.RoundedRectangleBorder(radius=8)
                             )
-                        ),
-                        col={"xs": 12, "sm": 12, "md": 6}, # Ocupa 12 colunas em telas pequenas, 6 em telas médias e grandes
-                        alignment=ft.alignment.center,
-                        padding=50
+                        )
+                    ],
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    spacing=15
                     )
-                ],
-                run_spacing=20, # Espaçamento entre as colunas quando elas quebram
-                alignment=ft.MainAxisAlignment.CENTER, # Centraliza as colunas horizontalmente
+                )
             )
         )

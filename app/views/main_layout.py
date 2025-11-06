@@ -4,14 +4,17 @@ from .pacientes import PacientesView
 from .sessoes import SessoesView
 from .configuracoes import ConfiguracoesView
 from .dashboard import DashboardView
-
 class MainLayout(ft.Container):
+    DESKTOP_COLLAPSE_BREAKPOINT = 1000 # Largura em pixels para recolher o menu no desktop
     def __init__(self, page: ft.Page, view_name: str, on_navigate):
-        super().__init__()
+        super().__init__(expand=True) # Garante que o layout principal ocupe todo o espaço
         self.page = page
         self.view_name = view_name
         self.on_navigate = on_navigate
-        self.menu_expanded = True
+        
+        self.menu_expanded = True # Estado atual do menu (expandido/recolhido)
+        self._is_manual_override_active = False # Indica se o usuário clicou no botão
+        self._last_auto_expanded_state = True # Último estado automático baseado na largura (assume tela larga inicialmente)
         self._current_view_instance = None  # To store the current view instance
         # Initialize controls that will be part of the layout
         self.navigation_rail_control = self._build_navigation_rail() # Store the NavigationRail instance
@@ -51,15 +54,44 @@ class MainLayout(ft.Container):
 
     def _on_page_resize(self, e=None):
         if self.page and self.page.width is not None: # Garante que page.width tenha um valor
-            self.content = self._build_layout_structure() # Reconstrói a estrutura do layout com base no novo tamanho
-            self.page.appbar = self.get_appbar_for_view() # Atualiza a AppBar da página
-            if self.page.drawer is None: # Adiciona o drawer apenas se não existir
+            is_mobile = self.page.width <= 768 # Ponto de quebra para modo mobile (drawer)
+
+            if is_mobile:
+                # Em modo mobile, o menu lateral fixo não é exibido.
+                # Conceitualmente, ele está "recolhido" e o drawer assume.
+                if self.menu_expanded: # Se estava expandido antes de ir para mobile
+                    self.menu_expanded = False
+                self._is_manual_override_active = False # Reseta o override manual para quando voltar ao desktop
+            else: # Modo desktop
+                current_width_wants_expanded = self.page.width > self.DESKTOP_COLLAPSE_BREAKPOINT
+
+                # Se o estado automático baseado na largura mudou (cruzou um breakpoint)
+                if current_width_wants_expanded != self._last_auto_expanded_state:
+                    self.menu_expanded = current_width_wants_expanded # Força para o estado automático
+                    self._is_manual_override_active = False # Reseta o override manual
+                elif not self._is_manual_override_active:
+                    # Se não cruzou breakpoint e não há override manual, aplica o estado automático
+                    self.menu_expanded = current_width_wants_expanded
+                # Senão (não cruzou breakpoint E override manual está ativo):
+                # Mantém self.menu_expanded como está (a escolha manual do usuário)
+
+                self._last_auto_expanded_state = current_width_wants_expanded # Atualiza o último estado automático
+
+            # Aplica o estado determinado de menu_expanded aos controles
+            self.navigation_rail_control.extended = self.menu_expanded
+            self.navigation_container.width = 250 if self.menu_expanded else 72
+            self.navigation_column.controls[0].alignment = ft.MainAxisAlignment.START if self.menu_expanded else ft.MainAxisAlignment.CENTER
+
+            self.content = self._build_layout_structure()
+            self.page.appbar = self.get_appbar_for_view()
+            if self.page.drawer is None:
                 self.page.drawer = self._build_navigation_drawer()
-            self.page.update() # Atualiza a página para renderizar as mudanças
+            self.page.update()
 
     def _toggle_menu(self, e):
         """Alterna entre o menu expandido e recolhido para desktop."""
         self.menu_expanded = not self.menu_expanded
+        self._is_manual_override_active = True # O usuário clicou, então há um override manual
         self.navigation_rail_control.extended = self.menu_expanded
         self.navigation_container.width = 250 if self.menu_expanded else 72
         self.navigation_column.controls[0].alignment = ft.MainAxisAlignment.START if self.menu_expanded else ft.MainAxisAlignment.CENTER # Update alignment of the menu icon row
@@ -98,7 +130,7 @@ class MainLayout(ft.Container):
             (ft.Icons.CALENDAR_MONTH, "Agenda", "agenda"),
             (ft.Icons.PEOPLE, "Pacientes", "pacientes"),
             (ft.Icons.LIST_ALT, "Sessões", "sessoes"),
-            (ft.Icons.SETTINGS, "Configurações", "configuracoes"),
+            (ft.Icons.SETTINGS, "Configuracoes", "configuracoes"),
             (ft.Icons.LOGOUT, "Sair", "sair")
         ]
 

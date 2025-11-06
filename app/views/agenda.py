@@ -57,7 +57,10 @@ class AgendaView(ft.Container):
                     ft.ResponsiveRow(
                         controls=[
                             ft.Container(
-                                content=self.build_calendar(),
+                                content=ft.Card( # Envolve o calendário em um Card
+                                    content=self.build_calendar(),
+                                    elevation=4
+                                ),
                                 col={"xs": 12, "md": 6, "lg": 7} # Ocupa toda a largura em telas pequenas, e metade em telas maiores
                             ),
                             ft.Container(
@@ -114,6 +117,12 @@ class AgendaView(ft.Container):
             is_selected = day == self.current_date.day
             highlight = day in dias_com_agendamento
 
+            date_for_day = self.current_date.replace(day=day)
+            # 0 = Domingo, 6 = Sábado
+            is_weekend = date_for_day.weekday() in [5, 6]
+
+            on_click_handler = lambda e, d=day: self.select_date(d)
+
             if is_selected:
                 color = ft.Colors.ON_PRIMARY
                 bgcolor = ft.Colors.PRIMARY
@@ -134,6 +143,14 @@ class AgendaView(ft.Container):
                 bgcolor = ft.Colors.SURFACE
                 border = None
                 weight = ft.FontWeight.NORMAL
+            
+            if is_weekend:
+                # Usando cores hexadecimais com canal alfa para compatibilidade
+                # 80 = 50% de opacidade
+                color = "#80000000"  # Cor do texto com opacidade
+                bgcolor = "#80E0E0E0" # Cor de fundo com opacidade
+                on_click_handler = None # Impede o clique
+
             week.append(ft.Container(
                 content=ft.Text(str(day), color=color, weight=weight),
                 height=40,
@@ -141,7 +158,7 @@ class AgendaView(ft.Container):
                 alignment=ft.alignment.center,
                 bgcolor=bgcolor,
                 border_radius=8,
-                on_click=lambda e, d=day: self.select_date(d),
+                on_click=on_click_handler,
                 border=border
             ))
             if len(week) == 7:
@@ -189,7 +206,6 @@ class AgendaView(ft.Container):
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER
             ),
             padding=20,
-            bgcolor=ft.Colors.SURFACE,
             border_radius=8
         )
 
@@ -385,6 +401,30 @@ class AgendaView(ft.Container):
             )
             appointment_cards.append(card)
         data_str = self.current_date.strftime('%d/%m/%Y')
+        
+        # Verifica se a data atual é um final de semana para desabilitar o botão
+        is_weekend = self.current_date.weekday() in [5, 6]
+
+        # Define o controle a ser exibido: o botão ou a mensagem de aviso
+        if is_weekend:
+            action_control = ft.Container(
+                content=ft.Text(
+                    "Não fazemos agendamentos aos finais de semana.",
+                    italic=True,
+                    # CC = 80% de opacidade
+                    color="#CC000000"
+                ),
+                alignment=ft.alignment.center,
+                padding=ft.padding.only(top=10, bottom=10)
+            )
+        else:
+            action_control = ft.ElevatedButton(
+                text="Novo agendamento",
+                icon=ft.Icons.ADD,
+                icon_color=ft.Colors.ON_PRIMARY,
+                on_click=self.new_appointment,
+                tooltip="Criar um novo agendamento para este dia"
+            )
 
         return ft.Container(
             content=ft.Column(
@@ -396,18 +436,19 @@ class AgendaView(ft.Container):
                     ),
                     *appointment_cards,
                     ft.Container(expand=True),
-                    ft.ElevatedButton(
-                        text="Novo agendamento",
-                        icon=ft.Icons.ADD,
-                        icon_color=ft.Colors.ON_PRIMARY,
-                        on_click=self.new_appointment
-                    )
+                    action_control
                 ],
             ),
             bgcolor=ft.Colors.SURFACE
         )
 
     def new_appointment(self, e):
+        # Verificação para não permitir agendamentos aos finais de semana
+        if self.current_date.weekday() in [5, 6]: # 5 = Sábado, 6 = Domingo
+            self.page.snack_bar = ft.SnackBar(ft.Text("Não é possível agendar em finais de semana."), open=True)
+            self.page.update()
+            return
+
         # 1. Data selecionada (não editável)
         selected_date = self.current_date
         # Data em português
@@ -582,6 +623,13 @@ class AgendaView(ft.Container):
 
         
     def select_date(self, day):
+        # Adiciona uma verificação para não selecionar finais de semana, caso o on_click não seja None
+        new_date = self.current_date.replace(day=day)
+        if new_date.weekday() in [5, 6]: # 5 = Sábado, 6 = Domingo
+            self.page.snack_bar = ft.SnackBar(ft.Text("Não é possível selecionar finais de semana."), open=True)
+            self.page.update()
+            return
+
         self.current_date = self.current_date.replace(day=day)
         self.content = self.build()
         self.update()
