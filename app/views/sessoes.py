@@ -109,10 +109,10 @@ class SessoesView(ft.Container):
                 # A função adicionar no controller de sessões precisa ser ajustada para aceitar 'status'
                 # Por enquanto, vamos assumir que ela foi ajustada ou criar uma nova lógica aqui.
                 sessoes_ctrl.db.cursor.execute("INSERT INTO sessoes (paciente_id, data_hora, status) VALUES (%s, %s, %s)", (int(novo_paciente), novo_dt, novo_status))
-                sessoes_ctrl.db.conn.commit()
-                close_dlg(ev)
-                self.page.snack_bar = ft.SnackBar(content=ft.Text("Sessão cadastrada!"), bgcolor=ft.Colors.SECONDARY_CONTAINER, open=True)
-                self.page.update()
+                sessoes_ctrl.db.conn.commit() # Commit da transação
+                close_dlg(ev) # Fecha o modal
+                self.page.snack_bar = ft.SnackBar(content=ft.Text("Sessão cadastrada!"), bgcolor=ft.Colors.SECONDARY_CONTAINER, open=True) # Mostra notificação
+                self.page.update() # Atualiza a página
             dlg_modal = ft.Container(
                 content=ft.Column(
                     controls=[
@@ -283,10 +283,7 @@ class SessoesView(ft.Container):
                     self.page.update()
                     return
             novo_dt = datetime.combine(nova_data.date(), datetime.strptime(novo_horario, '%H:%M').time())
-            sessoes_ctrl.editar(sessao['id'], int(novo_paciente), novo_dt)
-            # Atualizar status manualmente
-            sessoes_ctrl.db.cursor.execute("UPDATE sessoes SET status=%s WHERE id=%s", (novo_status, sessao['id']))
-            sessoes_ctrl.db.conn.commit()
+            sessoes_ctrl.editar(sessao_id=sessao['id'], paciente_id=int(novo_paciente), data_hora=novo_dt, status=novo_status)
             close_dlg(ev)
             self.page.snack_bar = ft.SnackBar(content=ft.Text("Agendamento alterado!"), bgcolor=ft.Colors.SECONDARY_CONTAINER)
             self.page.update()

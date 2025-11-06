@@ -12,7 +12,7 @@ class SessoesController:
         self.ASAAS_API_URL = "https://sandbox.asaas.com/api/v3/payments"
         self.ASAAS_CUSTOMER_URL = "https://sandbox.asaas.com/api/v3/customers"
 
-    def editar(self, sessao_id, paciente_id=None, data_hora=None):
+    def editar(self, sessao_id, paciente_id=None, data_hora=None, status=None):
         if not self.db.connect():
             raise Exception("Erro ao conectar ao banco de dados.")
         campos = []
@@ -23,6 +23,9 @@ class SessoesController:
         if data_hora is not None:
             campos.append("data_hora=%s")
             valores.append(data_hora.strftime('%Y-%m-%d %H:%M:%S'))
+        if status is not None:
+            campos.append("status=%s")
+            valores.append(status)
         if not campos:
             return False
         query = f"UPDATE sessoes SET {', '.join(campos)} WHERE id=%s"
