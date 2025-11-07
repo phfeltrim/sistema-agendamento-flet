@@ -25,7 +25,6 @@ class DashboardView(ft.Container):
             sections=[], # Inicia vazio
             sections_space=0,
             center_space_radius=40,
-            expand=True
         )
 
         # Constrói a view
@@ -93,7 +92,8 @@ class DashboardView(ft.Container):
 
                 # KPIs
                 ft.Row(
-                    alignment=ft.MainAxisAlignment.SPACE_AROUND,
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    spacing=30,
                     controls=[
                         ft.Card(
                             content=ft.Container(
@@ -121,13 +121,18 @@ class DashboardView(ft.Container):
                 ft.Container(
                     height=300,
                     content=ft.Row(
-                        alignment=ft.MainAxisAlignment.SPACE_AROUND,
+                        alignment=ft.MainAxisAlignment.CENTER,
+                        spacing=50,
                         controls=[
                             ft.Column([
                                 ft.Text("% Pagantes", weight=ft.FontWeight.BOLD),
                                 self.txt_perc_pagos
                             ]),
-                            self.chart_pagamentos,
+                            ft.Container(
+                                content=self.chart_pagamentos,
+                                width=200,  # Define uma largura fixa para o gráfico
+                                alignment=ft.alignment.center
+                            ),
                             ft.Column([
                                 ft.Text("% Não Pagantes", weight=ft.FontWeight.BOLD),
                                 self.txt_perc_nao_pagos
